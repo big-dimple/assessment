@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>评估报告</title>
+    <link rel="stylesheet" href="static/css/font-awesome/all.min.css">
+    <link rel="stylesheet" href="styles/unified-styles.css">
+    <style>
+        /* 页面特定样式 */
+        .project-info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+
+        .info-item {
+            padding: 16px;
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+        }
+
+        .info-label {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        /* 评分总览卡片 */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 30px;
+        }
+
+        .score-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+            position: relative;
+        }
+
+        .score-circle {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin-bottom: 20px;
+        }
+
+        .score-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: var(--white);
+            box-shadow: inset 0 0 0 10px var(--border-color);
+        }
+
+        .score-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            clip: rect(0, 160px, 160px, 80px);
+            background-color: transparent;
+            transform: rotate(0deg);
+        }
+
+        .score-fill-left, .score-fill-right {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            clip: rect(0, 80px, 160px, 0);
+            background-color: transparent;
+            transform: rotate(0deg);
+            box-shadow: inset 0 0 0 10px;
+        }
+
+        .score-fill-right {
+            clip: rect(0, 160px, 160px, 80px);
+        }
+
+        .score-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .grade-text {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* 雷达图容器 */
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* 风险评估卡片 */
+        .risk-box {
+            padding: 20px;
+            border-radius: var(--border-radius);
+            color: var(--white);
+            margin-bottom: 20px;
+        }
+
+        .risk-a {
+            background-color: var(--success-color);
+        }
+
+        .risk-b {
+            background-color: var(--primary-color);
+        }
+
+        .risk-c {
+            background-color: var(--warning-color);
+        }
+
+        .risk-d {
+            background-color: var(--danger-color);
+        }
+
+        .risk-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .risk-description {
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .risk-description p {
+            margin-bottom: 8px;
+        }
+
+        .risk-description p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 缺失项卡片 */
+        .missing-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .missing-item {
+            margin-bottom: 16px;
+            padding: 16px;
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+            border-left: 4px solid;
+        }
+
+        .missing-item-severe {
+            border-left-color: var(--danger-color);
+        }
+
+        .missing-item-major {
+            border-left-color: var(--warning-color);
+        }
+
+        .missing-item-minor {
+            border-left-color: var(--primary-color);
+        }
+
+        .missing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .missing-name {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .missing-icon {
+            color: var(--text-light);
+        }
+
+        .missing-score {
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .severity-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .severity-severe {
+            background-color: rgba(229, 62, 62, 0.1);
+            color: var(--danger-color);
+        }
+
+        .severity-major {
+            background-color: rgba(217, 119, 6, 0.1);
+            color: var(--warning-color);
+        }
+
+        .severity-minor {
+            background-color: rgba(90, 65, 245, 0.1);
+            color: var(--primary-color);
+        }
+
+        /* 各部分得分 */
+        .section-scores {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-card {
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-score {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .section-progress {
+            height: 8px;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .section-percentage {
+            font-size: 13px;
+            color: var(--text-light);
+            text-align: right;
+        }
+
+        /* 建议卡片 */
+        .suggestions-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .suggestion-card {
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            border-top: 3px solid var(--primary-color);
+        }
+
+        .suggestion-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .suggestion-title i {
+            color: var(--primary-color);
+        }
+
+        .suggestion-content {
+            font-size: 14px;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* 打印样式 */
+        @media print {
+            body {
+                background-color: white;
+                color: black;
+            }
+
+            .sidebar, .action-buttons, .page-actions {
+                display: none;
+            }
+
+            .main-content {
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+            }
+
+            .card {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+
+            .risk-box {
+                border: 1px solid;
+                color: black;
+            }
+
+            .risk-a {
+                border-color: var(--success-color);
+                background-color: rgba(56, 161, 105, 0.1);
+            }
+
+            .risk-b {
+                border-color: var(--primary-color);
+                background-color: rgba(90, 65, 245, 0.1);
+            }
+
+            .risk-c {
+                border-color: var(--warning-color);
+                background-color: rgba(217, 119, 6, 0.1);
+            }
+
+            .risk-d {
+                border-color: var(--danger-color);
+                background-color: rgba(229, 62, 62, 0.1);
+            }
+
+            .risk-title, .risk-description {
+                color: var(--text-color);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .score-display {
+                padding: 20px;
+            }
+            
+            .section-scores {
+                grid-template-columns: 1fr;
+            }
+            
+            .project-info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .project-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .suggestions-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-cube"></i>
+                    <span>游戏上线评估系统</span>
+                </div>
+                <div class="sidebar-sub">运维团队</div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <ul>
+                    <li><a href="index.html" id="nav-assessment"><i class="fas fa-clipboard-list"></i> <span>评估打分</span></a></li>
+                    <li>
+                        <div class="menu-toggle" id="history-toggle">
+                            <div>
+                                <i class="fas fa-history"></i>
+                                <span>历史评估</span>
+                            </div>
+                            <i class="fas fa-chevron-right toggle-icon"></i>
+                        </div>
+                        <ul class="sub-menu" id="history-submenu">
+                            <li><a href="historical-evaluations.html" id="nav-history-list" class="active"><i class="fas fa-list"></i> <span>评估列表</span></a></li>
+                            <li><a href="historical-evaluations.html#analytics-summary" id="nav-analytics"><i class="fas fa-chart-bar"></i> <span>数据分析</span></a></li>
+                        </ul>
+                    </li>
+                    <li><a href="help.html" id="nav-help"><i class="fas fa-question-circle"></i> <span>帮助指南</span></a></li>
+                    <li><a href="#" class="config-link"><i class="fas fa-cog"></i> <span>系统配置</span></a></li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <p>© 2025 游戏运维精英社</p>
+            </div>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-title-group">
+                    <h1 class="page-title" id="report-title">评估报告</h1>
+                    <p class="page-description" id="report-date">生成时间：2025年4月27日</p>
+                </div>
+                <div class="page-actions">
+                    <button id="print-btn" class="btn btn-secondary">
+                        <i class="fas fa-print"></i> 打印报告
+                    </button>
+                    <button id="export-btn" class="btn btn-primary">
+                        <i class="fas fa-file-export"></i> 导出报告
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 项目信息 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-info-circle"></i> 项目基本信息
+                    </div>
+                </div>
+                
+                <div class="project-info-grid">
+                    <div class="info-item">
+                        <div class="info-label">游戏名称</div>
+                        <div class="info-value" id="game-name">加载中...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">版本类型</div>
+                        <div class="info-value" id="game-version">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">版本号</div>
+                        <div class="info-value" id="version-number">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 评分总览 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-chart-pie"></i> 评分总览
+                    </div>
+                </div>
+                
+                <div class="summary-grid">
+                    <div class="score-display">
+                        <div class="score-circle">
+                            <div class="score-bg"></div>
+                            <div class="score-fill" id="score-fill">
+                                <div class="score-fill-left" id="score-fill-left"></div>
+                                <div class="score-fill-right" id="score-fill-right"></div>
+                            </div>
+                            <div class="score-value" id="total-score">0</div>
+                        </div>
+                        <div class="grade-badge" id="grade-badge">D级</div>
+                        <div class="grade-text" id="grade-text">风险等级：高</div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="radar-chart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 各部分得分 -->
+                <div class="section-scores">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <i class="fas fa-server"></i> 服务端文档
+                            </div>
+                            <div class="section-score" id="section1-score">0/50</div>
+                        </div>
+                        <div class="section-progress">
+                            <div class="progress-bar" id="section1-progress" style="width: 0%"></div>
+                        </div>
+                        <div class="section-percentage" id="section1-percentage">0%</div>
+                    </div>
+                    
+                    <div class="section-card">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <i class="fas fa-cubes"></i> 容器化文档
+                            </div>
+                            <div class="section-score" id="section2-score">0/30</div>
+                        </div>
+                        <div class="section-progress">
+                            <div class="progress-bar" id="section2-progress" style="width: 0%"></div>
+                        </div>
+                        <div class="section-percentage" id="section2-percentage">0%</div>
+                    </div>
+                    
+                    <div class="section-card">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <i class="fas fa-mobile-alt"></i> 客户端文档
+                            </div>
+                            <div class="section-score" id="section3-score">0/20</div>
+                        </div>
+                        <div class="section-progress">
+                            <div class="progress-bar" id="section3-progress" style="width: 0%"></div>
+                        </div>
+                        <div class="section-percentage" id="section3-percentage">0%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 风险评估 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-exclamation-triangle"></i> 风险评估
+                    </div>
+                </div>
+                
+                <div class="risk-box" id="risk-box">
+                    <div class="risk-title" id="risk-title">
+                        <i class="fas fa-exclamation-circle"></i> 风险等级：高
+                    </div>
+                    <div class="risk-description" id="risk-description">
+                        <p>文档准备严重不足，核心文档缺失。上线将面临严重风险，包括但不限于系统不稳定、性能问题、数据丢失、服务中断等。</p>
+                        <p><strong>不建议上线</strong>，必须完善核心文档后再考虑上线。继续推进上线计划可能导致严重后果，影响游戏声誉和商业利益。</p>
+                    </div>
+                </div>
+                
+                <!-- 评估结论 -->
+                <div id="assessment-conclusion" style="margin-top: 20px; padding: 16px; background-color: var(--bg-color); border-radius: var(--border-radius);">
+                    <p style="font-weight: 500; margin-bottom: 8px;">评估结论：</p>
+                    <p>该游戏的容器化部署文档严重不足，核心技术文档缺失，不符合上线标准。继续推进上线计划将面临严重风险，包括系统不稳定、性能问题和可能的数据丢失。强烈建议暂停上线计划，优先完善核心文档，待达到至少C级标准后再考虑上线。</p>
+                </div>
+            </div>
+            
+            <!-- 主要缺失项 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-clipboard-list"></i> 主要缺失项
+                    </div>
+                </div>
+                
+                <ul class="missing-list" id="missing-list">
+                    <!-- 通过JS动态填充 -->
+                </ul>
+            </div>
+            
+            <!-- 改进建议 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-lightbulb"></i> 改进建议
+                    </div>
+                </div>
+                
+                <div class="suggestions-list" id="suggestions-list">
+                    <!-- 通过JS动态填充 -->
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="index.html" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> 返回评分页
+                    </a>
+                    <a href="historical-evaluations.html" class="btn btn-primary">
+                        <i class="fas fa-history"></i> 查看历史记录
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 配置面板 -->
+    <div class="config-panel" id="config-panel">
+        <div class="config-header">
+            <div class="config-title">系统配置</div>
+            <button class="config-close" id="config-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="config-body">
+            <div class="config-section">
+                <div class="config-section-title">
+                    <i class="fas fa-cog"></i> 基本设置
+                </div>
+                <div class="config-form-row">
+                    <label>配置版本名称：</label>
+                    <input type="text" id="config-name" placeholder="例如：标准配置v1.0">
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <div class="config-section-title">
+                    <i class="fas fa-balance-scale"></i> 模块权重配置
+                </div>
+                <div class="config-form-row">
+                    <label>服务端文档权重：</label>
+                    <input type="number" id="section1-weight" min="1" max="80" value="50">
+                </div>
+                <div class="config-form-row">
+                    <label>容器化文档权重：</label>
+                    <input type="number" id="section2-weight" min="1" max="80" value="30">
+                </div>
+                <div class="config-form-row">
+                    <label>客户端文档权重：</label>
+                    <input type="number" id="section3-weight" min="1" max="80" value="20">
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <div class="config-section-title">
+                    <i class="fas fa-chart-line"></i> 风险等级阈值
+                </div>
+                <div class="config-form-row">
+                    <label>A级阈值：</label>
+                    <input type="number" id="threshold-a" min="75" max="100" value="90">
+                </div>
+                <div class="config-form-row">
+                    <label>B级阈值：</label>
+                    <input type="number" id="threshold-b" min="60" max="89" value="75">
+                </div>
+                <div class="config-form-row">
+                    <label>C级阈值：</label>
+                    <input type="number" id="threshold-c" min="1" max="74" value="60">
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <div class="config-section-title">
+                    <i class="fas fa-exclamation-triangle"></i> 缺失项判断阈值
+                </div>
+                <div class="config-form-row">
+                    <label>缺失判断阈值：</label>
+                    <input type="number" id="missing-threshold" min="0.1" max="0.9" step="0.05" value="0.6">
+                </div>
+            </div>
+        </div>
+        
+        <div class="config-actions">
+            <button id="reset-config" class="btn btn-secondary">重置默认</button>
+            <button id="save-config" class="btn btn-primary">保存配置</button>
+        </div>
+    </div>
+    
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title">操作成功</div>
+            <div class="toast-message">数据已保存</div>
+        </div>
+    </div>
+    
+    <script src="static/js/chart.min.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/config-system.js"></script>
+    <script src="js/dynamic-result-page.js"></script>
+
+    <script>
+        // 获取会话存储中的评估数据
+        const assessmentData = JSON.parse(sessionStorage.getItem('currentAssessment'));
+        let radarChart = null;
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化配置系统
+            if (typeof initConfigSystem === 'function') {
+                initConfigSystem();
+            }
+            
+            // 初始化页面内容
+            initPage();
+            
+            // 设置按钮事件监听
+            initButtonEvents();
+            
+            // 设置导航
+            document.getElementById('history-submenu').classList.add('open');
+            document.getElementById('history-toggle').classList.add('open');
+        });
+        
+        // 初始化页面内容
+        function initPage() {
+            if (!assessmentData) {
+                showToast('错误', '未找到评估数据，将返回评估页面', 'error');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+                return;
+            }
+            
+            // 设置页面标题
+            document.getElementById('report-title').textContent = `${assessmentData.gameName || '未命名项目'} - 评估报告`;
+            
+            // 设置报告日期
+            const reportDate = new Date(assessmentData.date);
+            document.getElementById('report-date').textContent = `生成时间：${reportDate.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            })}`;
+            
+            // 设置项目信息
+            document.getElementById('game-name').textContent = assessmentData.gameName || '未指定';
+            document.getElementById('game-version').textContent = assessmentData.gameVersion || '-';
+            document.getElementById('version-number').textContent = assessmentData.versionNumber || '-';
+            
+            // 设置总分和等级
+            updateScoreDisplay();
+            
+            // 设置各部分得分
+            updateSectionScores();
+            
+            // 设置雷达图
+            renderRadarChart();
+            
+            // 设置风险评估
+            updateRiskAssessment();
+            
+            // 设置主要缺失项
+            renderMissingItems();
+            
+            // 设置改进建议
+            renderSuggestions();
+        }
+        
+        // 初始化按钮事件
+        function initButtonEvents() {
+            // 打印按钮
+            document.getElementById('print-btn').addEventListener('click', printReport);
+            
+            // 导出按钮
+            document.getElementById('export-btn').addEventListener('click', exportReport);
+        }
+        
+        // 更新分数显示
+        function updateScoreDisplay() {
+            const totalScore = assessmentData.totalScore || 0;
+            document.getElementById('total-score').textContent = totalScore;
+            
+            // 设置得分环形动画
+            const scorePercent = totalScore / 100;
+            const scoreLeftEl = document.getElementById('score-fill-left');
+            const scoreRightEl = document.getElementById('score-fill-right');
+            
+            // 计算颜色
+            let scoreColor = getScoreColor(totalScore);
+            
+            // 设置颜色
+            scoreLeftEl.style.boxShadow = `inset 0 0 0 10px ${scoreColor}`;
+            scoreRightEl.style.boxShadow = `inset 0 0 0 10px ${scoreColor}`;
+            
+            // 动画设置
+            if (scorePercent > 0.5) {
+                scoreLeftEl.style.transform = 'rotate(180deg)';
+                scoreRightEl.style.transform = `rotate(${scorePercent * 360 - 180}deg)`;
+            } else {
+                scoreLeftEl.style.transform = `rotate(${scorePercent * 360}deg)`;
+                scoreRightEl.style.transform = 'rotate(0deg)';
+            }
+            
+            // 设置等级和风险等级
+            const grade = getGradeFromScore(totalScore);
+            const gradeBadge = document.getElementById('grade-badge');
+            gradeBadge.textContent = grade + '级';
+            gradeBadge.className = `grade-badge grade-${grade.toLowerCase()}`;
+            
+            let riskText = '';
+            switch(grade) {
+                case 'A': riskText = '风险等级：低'; break;
+                case 'B': riskText = '风险等级：中低'; break;
+                case 'C': riskText = '风险等级：中高'; break;
+                case 'D': riskText = '风险等级：高'; break;
+            }
+            document.getElementById('grade-text').textContent = riskText;
+            
+            // 同步颜色设置
+            document.getElementById('total-score').style.color = scoreColor;
+        }
+        
+        // 获取分数颜色
+        function getScoreColor(score) {
+            if (score >= 90) return 'var(--success-color)';
+            if (score >= 75) return 'var(--primary-color)';
+            if (score >= 60) return 'var(--warning-color)';
+            return 'var(--danger-color)';
+        }
+        
+        // 获取等级
+        function getGradeFromScore(score) {
+            score = Number(score) || 0;
+            
+            // 使用评估时的阈值（如果有）
+            if (assessmentData.config && assessmentData.config.thresholds) {
+                if (score >= assessmentData.config.thresholds.A) return 'A';
+                if (score >= assessmentData.config.thresholds.B) return 'B';
+                if (score >= assessmentData.config.thresholds.C) return 'C';
+                return 'D';
+            }
+            
+            // 默认阈值
+            if (score >= 90) return 'A';
+            if (score >= 75) return 'B';
+            if (score >= 60) return 'C';
+            return 'D';
+        }
+        
+        // 更新各部分得分
+        function updateSectionScores() {
+            const { sectionScores } = assessmentData;
+            
+            // 服务端文档
+            const section1Percentage = Math.round((sectionScores[1].current / sectionScores[1].max) * 100);
+            document.getElementById('section1-score').textContent = `${sectionScores[1].current}/${sectionScores[1].max}`;
+            document.getElementById('section1-progress').style.width = `${section1Percentage}%`;
+            document.getElementById('section1-percentage').textContent = `${section1Percentage}%`;
+            
+            // 容器化文档
+            const section2Percentage = Math.round((sectionScores[2].current / sectionScores[2].max) * 100);
+            document.getElementById('section2-score').textContent = `${sectionScores[2].current}/${sectionScores[2].max}`;
+            document.getElementById('section2-progress').style.width = `${section2Percentage}%`;
+            document.getElementById('section2-percentage').textContent = `${section2Percentage}%`;
+            
+            // 客户端文档
+            const section3Percentage = Math.round((sectionScores[3].current / sectionScores[3].max) * 100);
+            document.getElementById('section3-score').textContent = `${sectionScores[3].current}/${sectionScores[3].max}`;
+            document.getElementById('section3-progress').style.width = `${section3Percentage}%`;
+            document.getElementById('section3-percentage').textContent = `${section3Percentage}%`;
+        }
+        
+        // 渲染雷达图
+        function renderRadarChart() {
+            const ctx = document.getElementById('radar-chart').getContext('2d');
+            
+            // 计算百分比得分
+            const { sectionScores } = assessmentData;
+            const scores = [
+                (sectionScores[1].current / sectionScores[1].max) * 100,
+                (sectionScores[2].current / sectionScores[2].max) * 100,
+                (sectionScores[3].current / sectionScores[3].max) * 100
+            ];
+            
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['服务端文档', '容器化文档', '客户端文档'],
+                    datasets: [{
+                        label: '当前完成度',
+                        data: scores,
+                        fill: true,
+                        backgroundColor: 'rgba(90, 65, 245, 0.2)',
+                        borderColor: 'rgba(90, 65, 245, 0.8)',
+                        pointBackgroundColor: '#5A41F5',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(90, 65, 245)',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            ticks: {
+                                stepSize: 20,
+                                showLabelBackdrop: false,
+                                color: 'var(--text-light)',
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 14,
+                                    weight: '500'
+                                },
+                                color: 'var(--text-color)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `完成度: ${context.raw.toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 更新风险评估
+        function updateRiskAssessment() {
+            const totalScore = assessmentData.totalScore || 0;
+            const grade = getGradeFromScore(totalScore);
+            
+            const riskBox = document.getElementById('risk-box');
+            const riskTitle = document.getElementById('risk-title');
+            const riskDescription = document.getElementById('risk-description');
+            
+            // 设置样式
+            riskBox.className = `risk-box risk-${grade.toLowerCase()}`;
+            
+            // 设置标题
+            let titleText = '';
+            switch(grade) {
+                case 'A': titleText = '风险等级：低'; break;
+                case 'B': titleText = '风险等级：中低'; break;
+                case 'C': titleText = '风险等级：中高'; break;
+                case 'D': titleText = '风险等级：高'; break;
+            }
+            riskTitle.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${titleText}`;
+            
+            // 设置描述
+            let description = '';
+            let conclusion = '';
+            
+            switch(grade) {
+                case 'A':
+                    description = `
+                        <p>文档准备充分完整，各系统组件间依赖关系清晰，容器化部署所需的所有技术要点都已覆盖。当前状态下可以安排上线，预期不会出现严重问题。</p>
+                        <p>建议持续关注运行状态，并根据实际运行情况进一步优化容器化配置。</p>
+                    `;
+                    conclusion = '该游戏的容器化部署文档准备非常充分，已达到生产环境部署标准。所有关键文档和技术要点均已覆盖，团队对容器化架构有清晰的理解和规划。可以进入下一阶段的部署工作。';
+                    break;
+                case 'B':
+                    description = `
+                        <p>文档准备较为充分，但有少量细节缺失。存在一定风险，但通过合理的规划和监控可以有效管理。</p>
+                        <p>建议补充完善缺失的文档项后再上线，或在上线过程中特别关注相关风险点，并制定应对策略。</p>
+                    `;
+                    conclusion = '该游戏的容器化部署文档准备较为充分，大部分关键文档已完备。存在少量需要改进的地方，但不影响整体部署计划。建议在进入正式部署前，补充完善缺失的文档项。';
+                    break;
+                case 'C':
+                    description = `
+                        <p>文档准备不足，存在明显风险。虽然勉强可以上线，但在实际运行中可能会遇到较多问题，影响游戏稳定性和用户体验。</p>
+                        <p>如果必须按期上线，请务必做好应急预案，并在上线后迅速补充完善文档。建议考虑延期上线，优先完善关键文档。</p>
+                    `;
+                    conclusion = '该游戏的容器化部署文档存在明显不足，虽然勉强达到最低上线标准，但存在较多风险点。如坚持按期上线，必须制定详细的风险应对措施，并在上线后尽快完善文档。推荐考虑适当延期，优先解决关键文档缺失问题。';
+                    break;
+                case 'D':
+                    description = `
+                        <p>文档准备严重不足，核心文档缺失。上线将面临严重风险，包括但不限于系统不稳定、性能问题、数据丢失、服务中断等。</p>
+                        <p><strong>不建议上线</strong>，必须完善核心文档后再考虑上线。继续推进上线计划可能导致严重后果，影响游戏声誉和商业利益。</p>
+                    `;
+                    conclusion = '该游戏的容器化部署文档严重不足，核心技术文档缺失，不符合上线标准。继续推进上线计划将面临严重风险，包括系统不稳定、性能问题和可能的数据丢失。强烈建议暂停上线计划，优先完善核心文档，待达到至少C级标准后再考虑上线。';
+                    break;
+            }
+            
+            riskDescription.innerHTML = description;
+            document.getElementById('assessment-conclusion').innerHTML = `
+                <p style="font-weight: 500; margin-bottom: 8px;">评估结论：</p>
+                <p>${conclusion}</p>
+            `;
+        }
+        
+        // 渲染主要缺失项
+        function renderMissingItems() {
+            const missingList = document.getElementById('missing-list');
+            missingList.innerHTML = '';
+            
+            // 定义文档项
+            const docItems = [
+                { id: 'system-architecture', name: '系统架构文档', section: 1, max: 8, importance: 'high' },
+                { id: 'deployment-requirements', name: '部署需求文档', section: 1, max: 9, importance: 'high' },
+                { id: 'configuration-management', name: '配置管理文档', section: 1, max: 8, importance: 'high' },
+                { id: 'database-docs', name: '数据库文档', section: 1, max: 7, importance: 'high' },
+                { id: 'monitoring-metrics', name: '监控指标文档', section: 1, max: 6, importance: 'medium' },
+                { id: 'version-management', name: '版本管理文档', section: 1, max: 4, importance: 'medium' },
+                { id: 'operation-manual', name: '操作手册', section: 1, max: 4, importance: 'medium' },
+                { id: 'server-merge', name: '合服相关文档', section: 1, max: 4, importance: 'medium' },
+                { id: 'container-orchestration', name: '容器编排需求', section: 2, max: 7, importance: 'high' },
+                { id: 'persistent-storage', name: '持久化存储方案', section: 2, max: 6, importance: 'high' },
+                { id: 'network-solution', name: '网络方案', section: 2, max: 6, importance: 'high' },
+                { id: 'cicd-integration', name: 'CI/CD集成', section: 2, max: 4, importance: 'medium' },
+                { id: 'container-image-management', name: '容器镜像管理', section: 2, max: 4, importance: 'medium' },
+                { id: 'performance-test', name: '性能测试报告', section: 2, max: 3, importance: 'medium' },
+                { id: 'client-version', name: '客户端版本文档', section: 3, max: 5, importance: 'medium' },
+                { id: 'resource-management', name: '资源管理文档', section: 3, max: 4, importance: 'medium' },
+                { id: 'service-discovery', name: '服务发现文档', section: 3, max: 5, importance: 'high' },
+                { id: 'security-requirements', name: '安全需求文档', section: 3, max: 4, importance: 'medium' },
+                { id: 'client-logs', name: '客户端日志文档', section: 3, max: 2, importance: 'low' }
+            ];
+            
+            // 获取缺失判断阈值（评估时或配置中）
+            let missingThreshold = 0.6;
+            if (assessmentData.config && assessmentData.config.missingThreshold) {
+                missingThreshold = assessmentData.config.missingThreshold;
+            } else if (typeof currentConfig !== 'undefined' && currentConfig.missingThreshold) {
+                missingThreshold = currentConfig.missingThreshold;
+            }
+            
+            // 计算缺失项
+            const missingItems = [];
+            const scores = assessmentData.scores || {};
+            
+            docItems.forEach(item => {
+                const score = scores[item.id] || 0;
+                const ratio = score / item.max;
+                
+                if (ratio < missingThreshold) {
+                    missingItems.push({
+                        ...item,
+                        score,
+                        ratio,
+                        severity: ratio < 0.3 ? 'severe' : (ratio < 0.5 ? 'major' : 'minor')
+                    });
+                }
+            });
+            
+            // 按重要性和严重程度排序
+            missingItems.sort((a, b) => {
+                const importanceOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+                const severityOrder = { 'severe': 3, 'major': 2, 'minor': 1 };
+                
+                // 先按重要性排序
+                const importanceDiff = importanceOrder[b.importance] - importanceOrder[a.importance];
+                if (importanceDiff !== 0) return importanceDiff;
+                
+                // 重要性相同时按严重程度排序
+                return severityOrder[b.severity] - severityOrder[a.severity];
+            });
+            
+            // 渲染缺失项
+            if (missingItems.length === 0) {
+                const li = document.createElement('li');
+                li.className = 'missing-item';
+                li.innerHTML = `
+                    <div class="missing-header">
+                        <div class="missing-name">
+                            <i class="fas fa-check-circle" style="color: var(--success-color);"></i> 未发现明显缺失项
+                        </div>
+                    </div>
+                    <p>所有文档项均达到或超过最低要求标准。恭喜！</p>
+                `;
+                missingList.appendChild(li);
+                return;
+            }
+            
+            // 最多显示6项
+            const displayItems = missingItems.slice(0, 6);
+            displayItems.forEach(item => {
+                const li = document.createElement('li');
+                li.className = `missing-item missing-item-${item.severity}`;
+                
+                // 设置图标
+                let icon = '';
+                let severityText = '';
+                
+                switch (item.severity) {
+                    case 'severe':
+                        icon = '<i class="fas fa-exclamation-circle missing-icon" style="color: var(--danger-color);"></i>';
+                        severityText = '<span class="severity-tag severity-severe">严重缺失</span>';
+                        break;
+                    case 'major':
+                        icon = '<i class="fas fa-exclamation-triangle missing-icon" style="color: var(--warning-color);"></i>';
+                        severityText = '<span class="severity-tag severity-major">明显不足</span>';
+                        break;
+                    case 'minor':
+                        icon = '<i class="fas fa-info-circle missing-icon" style="color: var(--primary-color);"></i>';
+                        severityText = '<span class="severity-tag severity-minor">部分缺失</span>';
+                        break;
+                }
+                
+                // 设置按模块分类的图标
+                let sectionIcon = '';
+                switch (item.section) {
+                    case 1:
+                        sectionIcon = '<i class="fas fa-server" style="color: var(--text-light); margin-right: 6px;"></i>';
+                        break;
+                    case 2:
+                        sectionIcon = '<i class="fas fa-cubes" style="color: var(--text-light); margin-right: 6px;"></i>';
+                        break;
+                    case 3:
+                        sectionIcon = '<i class="fas fa-mobile-alt" style="color: var(--text-light); margin-right: 6px;"></i>';
+                        break;
+                }
+                
+                // 设置缺失项内容
+                li.innerHTML = `
+                    <div class="missing-header">
+                        <div class="missing-name">
+                            ${icon} ${sectionIcon}${item.name} ${severityText}
+                        </div>
+                        <div class="missing-score">${item.score}/${item.max}</div>
+                    </div>
+                `;
+                
+                // 添加补充建议
+                let suggestion = '';
+                switch (item.id) {
+                    case 'system-architecture':
+                        suggestion = '应提供完整的系统组件关系图和详细的模块功能描述，明确系统间交互流程和技术栈详情。';
+                        break;
+                    case 'deployment-requirements':
+                        suggestion = '需详细说明硬件资源需求、软件依赖、网络要求、部署步骤和验证方法。';
+                        break;
+                    case 'network-solution':
+                        suggestion = '应详述容器网络模型选择、服务暴露策略、网络隔离需求和负载均衡配置。';
+                        break;
+                    case 'persistent-storage':
+                        suggestion = '应说明存储需求估算、卷类型选择、备份策略、数据持久性要求和存储性能参数。';
+                        break;
+                    case 'container-orchestration':
+                        suggestion = '需提供容器间依赖关系图、启动顺序策略、扩缩容策略和服务发现配置。';
+                        break;
+                    case 'service-discovery':
+                        suggestion = '应详述客户端如何发现和连接到容器化服务、负载均衡策略和故障转移机制。';
+                        break;
+                    default:
+                        suggestion = '请参考帮助指南中的相关文档标准，补充完善此文档项。';
+                }
+                
+                // 添加建议
+                const suggestionDiv = document.createElement('div');
+                suggestionDiv.style.marginTop = '6px';
+                suggestionDiv.style.fontSize = '14px';
+                suggestionDiv.textContent = suggestion;
+                li.appendChild(suggestionDiv);
+                
+                missingList.appendChild(li);
+            });
+            
+            // 如果还有更多缺失项
+            if (missingItems.length > 6) {
+                const more = document.createElement('li');
+                more.style.textAlign = 'center';
+                more.style.marginTop = '10px';
+                more.style.fontSize = '14px';
+                more.style.color = 'var(--text-light)';
+                more.textContent = `还有 ${missingItems.length - 6} 项文档不达标，需要改进`;
+                missingList.appendChild(more);
+            }
+        }
+        
+        // 渲染改进建议
+        function renderSuggestions() {
+            const suggestionsList = document.getElementById('suggestions-list');
+            suggestionsList.innerHTML = '';
+            
+            // 获取总分和等级
+            const totalScore = assessmentData.totalScore || 0;
+            const grade = getGradeFromScore(totalScore);
+            
+            // 准备建议
+            const suggestions = [];
+            
+            // 1. 通用建议：文档更新机制
+            suggestions.push({
+                icon: 'fas fa-sync-alt',
+                title: '建立文档更新机制',
+                content: '建议建立容器化相关文档的定期审核和更新机制，确保文档始终与实际部署环境保持一致，特别是在系统架构发生变化时及时更新相关文档。'
+            });
+            
+            // 2. 基于评分等级的建议
+            switch (grade) {
+                case 'A':
+                    suggestions.push({
+                        icon: 'fas fa-chart-line',
+                        title: '持续优化容器化配置',
+                        content: '在完成基本部署后，建议持续监控系统性能指标，根据实际运行数据优化容器资源分配、网络配置和存储策略，进一步提升系统效率和稳定性。'
+                    });
+                    break;
+                case 'B':
+                    suggestions.push({
+                        icon: 'fas fa-tools',
+                        title: '完善细节文档',
+                        content: '当前文档准备较为充分，但仍有细节需要完善。建议在上线前补充完善缺失的文档项，特别关注缺失项列表中标记的高优先级文档。'
+                    });
+                    break;
+                case 'C':
+                    suggestions.push({
+                        icon: 'fas fa-exclamation-triangle',
+                        title: '制定风险控制计划',
+                        content: '虽然达到了最低上线标准，但当前存在明显风险。建议：1) 组建专门的风险监控小组；2) 准备详细的回滚方案；3) 考虑先在非核心区域小范围部署验证；4) 制定明确的文档补充时间表，并在上线后一周内完成。'
+                    });
+                    break;
+                case 'D':
+                    suggestions.push({
+                        icon: 'fas fa-ban',
+                        title: '⚠️ 不建议当前状态上线',
+                        content: '当前文档准备严重不足，上线风险过高。建议组织专项会议，制定详细的文档补充计划，并分配足够的资源和时间完成文档准备工作。在达到至少C级（60分以上）准备程度前，不建议推进上线计划。'
+                    });
+                    break;
+            }
+            
+            // 3. 基于各模块得分的建议
+            const { sectionScores } = assessmentData;
+            
+            // 服务端文档建议
+            if (sectionScores[1].current / sectionScores[1].max < 0.7) {
+                suggestions.push({
+                    icon: 'fas fa-server',
+                    title: '完善服务端核心文档',
+                    content: '服务端文档是容器化部署的基础，建议优先补充和完善系统架构、部署需求和配置管理等核心文档，确保运维团队对服务架构有清晰理解。'
+                });
+            }
+            
+            // 容器化特定文档建议
+            if (sectionScores[2].current / sectionScores[2].max < 0.7) {
+                suggestions.push({
+                    icon: 'fas fa-cubes',
+                    title: '加强容器化技术文档',
+                    content: '容器化特定文档对成功部署至关重要，建议重点关注容器编排需求、持久化存储方案和网络方案等关键文档，确保容器环境中的服务稳定运行。'
+                });
+            }
+            
+            // 客户端文档建议
+            if (sectionScores[3].current / sectionScores[3].max < 0.7) {
+                suggestions.push({
+                    icon: 'fas fa-mobile-alt',
+                    title: '完善客户端与服务器交互文档',
+                    content: '客户端与容器化服务的交互机制需要明确文档化，特别是服务发现和安全需求文档，以确保客户端能正确连接到容器化后的服务。'
+                });
+            }
+            
+            // 渲染建议
+            suggestions.forEach(suggestion => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-card';
+                div.innerHTML = `
+                    <div class="suggestion-title">
+                        <i class="${suggestion.icon}"></i> ${suggestion.title}
+                    </div>
+                    <div class="suggestion-content">
+                        ${suggestion.content}
+                    </div>
+                `;
+                suggestionsList.appendChild(div);
+            });
+        }
+        
+        // 打印报告
+        function printReport() {
+            window.print();
+        }
+        
+        // 导出报告
+        function exportReport() {
+            if (!assessmentData) return;
+            
+            // 准备导出数据
+            const exportData = {
+                exported_date: new Date().toISOString(),
+                report_type: 'container_deployment_assessment',
+                project: {
+                    name: assessmentData.gameName,
+                    version_type: assessmentData.gameVersion,
+                    version_number: assessmentData.versionNumber,
+                    assessment_date: assessmentData.date
+                },
+                scores: {
+                    total: assessmentData.totalScore,
+                    grade: getGradeFromScore(assessmentData.totalScore),
+                    sections: {
+                        server_docs: assessmentData.sectionScores[1],
+                        container_docs: assessmentData.sectionScores[2],
+                        client_docs: assessmentData.sectionScores[3]
+                    },
+                    items: assessmentData.scores
+                }
+            };
+            
+            // 创建下载链接
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+            const fileName = `${exportData.project.name || 'project'}_deployment_assessment_${formatDate(new Date())}.json`;
+            
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", fileName);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            
+            showToast('导出成功', '评估报告已导出');
+        }
+        
+        // 格式化日期：YYYYMMDD
+        function formatDate(date) {
+            return date.toISOString().split('T')[0].replace(/-/g, '');
+        }
+    </script>
+</body>
+</html>

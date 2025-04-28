@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏上线评估系统</title>
+    <link rel="stylesheet" href="static/css/font-awesome/all.min.css">
+    <link rel="stylesheet" href="styles/unified-styles.css">
+    <style>
+        /* 页面特定样式 */
+        .project-info {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .project-info input, 
+        .project-info select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        .project-info input:focus, 
+        .project-info select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(90, 65, 245, 0.1);
+            outline: none;
+        }
+
+        .save-load {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .save-load select {
+            flex: 2;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+        }
+
+        .save-load select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(90, 65, 245, 0.1);
+            outline: none;
+        }
+
+        /* 评分部分 */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-total {
+            font-size: 14px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .section-progress {
+            height: 6px;
+            background-color: var(--secondary-color);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .score-item {
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            transition: var(--transition);
+        }
+
+        .score-item:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            border-color: var(--primary-light);
+        }
+
+        .score-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .score-item-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .score-item-max {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .score-item-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-input {
+            width: 60px;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        .score-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(90, 65, 245, 0.1);
+            outline: none;
+        }
+
+        .score-help {
+            color: var(--text-light);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .score-help:hover {
+            color: var(--primary-color);
+        }
+
+        .tooltip {
+            position: absolute;
+            visibility: hidden;
+            opacity: 0;
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 10px 12px;
+            width: 260px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-size: 13px;
+            top: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            transition: opacity 0.2s, visibility 0.2s;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .tooltip::before {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent var(--border-color) transparent;
+        }
+
+        .score-help:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* 结果展示 */
+        .result-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .result-summary {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        .score-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-right: 40px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .total-score {
+            font-size: 56px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            letter-spacing: -1px;
+        }
+
+        .score-label {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+
+        .chart-container {
+            flex: 1;
+            height: 200px;
+        }
+
+        .grade-indicator {
+            display: flex;
+            margin-bottom: 25px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .grade {
+            flex: 1;
+            text-align: center;
+            padding: 12px 10px;
+            font-weight: 500;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .grade-a { 
+            color: var(--success-color);
+            border-bottom: 2px solid transparent;
+        }
+        .grade-b { 
+            color: var(--primary-color);
+            border-bottom: 2px solid transparent;
+        }
+        .grade-c { 
+            color: var(--warning-color);
+            border-bottom: 2px solid transparent;
+        }
+        .grade-d { 
+            color: var(--danger-color);
+            border-bottom: 2px solid transparent;
+        }
+
+        .grade.active {
+            background-color: var(--secondary-color);
+        }
+
+        .grade-a.active { border-bottom-color: var(--success-color); }
+        .grade-b.active { border-bottom-color: var(--primary-color); }
+        .grade-c.active { border-bottom-color: var(--warning-color); }
+        .grade-d.active { border-bottom-color: var(--danger-color); }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 992px) {
+            .score-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-summary {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .score-display {
+                padding-right: 0;
+                padding-bottom: 20px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .project-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-cube"></i>
+                    <span>游戏上线评估系统</span>
+                </div>
+                <div class="sidebar-sub">运维团队</div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <ul>
+                    <li><a href="index.html" id="nav-assessment" class="active"><i class="fas fa-clipboard-list"></i> <span>评估打分</span></a></li>
+                    <li>
+                        <div class="menu-toggle" id="history-toggle">
+                            <div>
+                                <i class="fas fa-history"></i>
+                                <span>历史评估</span>
+                            </div>
+                            <i class="fas fa-chevron-right toggle-icon"></i>
+                        </div>
+                        <ul class="sub-menu" id="history-submenu">
+                            <li><a href="historical-evaluations.html" id="nav-history-list"><i class="fas fa-list"></i> <span>评估列表</span></a></li>
+                            <li><a href="historical-evaluations.html#analytics-summary" id="nav-analytics"><i class="fas fa-chart-bar"></i> <span>数据分析</span></a></li>
+                        </ul>
+                    </li>
+                    <li><a href="help.html" id="nav-help"><i class="fas fa-question-circle"></i> <span>帮助指南</span></a></li>
+                    <li><a href="#" class="config-link"><i class="fas fa-cog"></i> <span>系统配置</span></a></li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <p>© 2025 游戏运维精英社</p>
+            </div>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-title-group">
+                    <h1 class="page-title">就绪度评估</h1>
+                    <p class="page-description">评估新游戏部署前的文档完备性-侧面印证技术准备情况</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-project-diagram"></i> 项目信息
+                    </div>
+                </div>
+                
+                <div class="project-info">
+                    <input type="text" id="game-name" placeholder="游戏名称（必填）" required>
+                    <select id="game-version">
+                        <option value="">选择版本类型</option>
+                        <option value="首发版本">首发版本</option>
+                        <option value="大版本更新">大版本更新</option>
+                        <option value="小版本更新">小版本更新</option>
+                    </select>
+                    <input type="text" id="version-number" placeholder="版本号（如 1.0.0）">
+                </div>
+                
+                <div class="save-load">
+                    <select id="load-data">
+                        <option value="">加载已保存的评估</option>
+                    </select>
+                    <button class="btn btn-secondary" id="load-btn">
+                        <i class="fas fa-folder-open"></i> 加载
+                    </button>
+                </div>
+            </div>
+            
+            <form id="score-form">
+                <!-- 服务端文档 -->
+                <div class="card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <i class="fas fa-server"></i> 服务端文档评估
+                        </div>
+                        <div class="section-total">得分：<span id="section1-score">0</span>/<span id="section1-max">50</span></div>
+                    </div>
+                    
+                    <div class="section-progress">
+                        <div class="progress-bar" id="section1-progress"></div>
+                    </div>
+                    
+                    <div class="score-grid" id="section1-grid">
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">系统架构文档</div>
+                                <div class="score-item-max">满分：8分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="system-architecture" min="0" max="8" value="0" data-section="1" data-max="8">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>系统架构文档应包含系统组件关系图、模块功能描述、交互流程、技术栈详情和系统依赖说明。完整详细的架构图和清晰的组件职责划分是高分关键。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">部署需求文档</div>
+                                <div class="score-item-max">满分：9分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="deployment-requirements" min="0" max="9" value="0" data-section="1" data-max="9">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>部署需求文档应详细说明硬件资源需求、软件依赖、网络要求、部署步骤和验证方法。提供可执行的部署脚本和明确的资源估算方法是高分要点。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">配置管理文档</div>
+                                <div class="score-item-max">满分：8分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="configuration-management" min="0" max="8" value="0" data-section="1" data-max="8">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>配置管理文档应包含配置项清单、配置文件示例与说明、环境差异配置、敏感配置处理方法和配置更新流程。明确的配置变更机制是高分关键。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">数据库文档</div>
+                                <div class="score-item-max">满分：7分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="database-docs" min="0" max="7" value="0" data-section="1" data-max="7">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>数据库文档应包含数据库架构设计、表结构定义、索引设计、查询优化建议、数据迁移方案和备份恢复策略。清晰的数据模型和性能优化建议是高分要点。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">监控指标文档</div>
+                                <div class="score-item-max">满分：6分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="monitoring-metrics" min="0" max="6" value="0" data-section="1" data-max="6">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>监控指标文档应定义关键性能指标(KPI)、健康检查方法、监控阈值建议、日志格式规范和警报策略。提供完整的监控仪表盘配置是高分因素。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">版本管理文档</div>
+                                <div class="score-item-max">满分：4分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="version-management" min="0" max="4" value="0" data-section="1" data-max="4">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>版本管理文档需说明版本命名规则、版本控制策略、发布流程、回滚机制和版本兼容性考虑。明确的版本发布与回滚流程图是高分关键。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">操作手册</div>
+                                <div class="score-item-max">满分：4分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="operation-manual" min="0" max="4" value="0" data-section="1" data-max="4">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>操作手册应包含日常运维操作指南、故障排查流程、常见问题解决方案和系统管理员职责说明。详细的故障处理决策树是高分要点。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">合服相关文档</div>
+                                <div class="score-item-max">满分：4分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="server-merge" min="0" max="4" value="0" data-section="1" data-max="4">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>合服相关文档需详述服务器合并流程、数据合并策略、冲突解决方案、服务中断时间估计和回滚计划。详细的数据冲突处理机制是高分关键。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 容器化文档 -->
+                <div class="card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <i class="fas fa-cubes"></i> 容器化特定文档评估
+                        </div>
+                        <div class="section-total">得分：<span id="section2-score">0</span>/<span id="section2-max">30</span></div>
+                    </div>
+                    
+                    <div class="section-progress">
+                        <div class="progress-bar" id="section2-progress"></div>
+                    </div>
+                    
+                    <div class="score-grid" id="section2-grid">
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">容器编排需求</div>
+                                <div class="score-item-max">满分：7分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="container-orchestration" min="0" max="7" value="0" data-section="2" data-max="7">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>容器编排需求应包含容器间依赖关系图、启动顺序和等待策略、扩缩容策略、资源分配建议、健康检查设置和服务发现配置。提供完整的K8s或Docker Compose配置示例是高分要点。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">持久化存储方案</div>
+                                <div class="score-item-max">满分：6分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="persistent-storage" min="0" max="6" value="0" data-section="2" data-max="6">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>持久化存储方案需说明存储需求估算、卷类型选择、备份策略、数据持久性要求和存储性能参数。提供不同数据类型的存储策略和性能测试结果是高分关键。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">网络方案</div>
+                                <div class="score-item-max">满分：6分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="network-solution" min="0" max="6" value="0" data-section="2" data-max="6">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>网络方案应详述容器网络模型选择、服务暴露策略、网络隔离需求、负载均衡配置和网络安全考虑。明确的网络拓扑图和安全策略是高分要点。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">CI/CD集成</div>
+                                <div class="score-item-max">满分：4分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="cicd-integration" min="0" max="4" value="0" data-section="2" data-max="4">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>CI/CD集成文档需包含构建流程描述、测试策略、部署管道设计、自动化脚本示例和集成点说明。完整的CI/CD流水线配置文件是高分关键。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">容器镜像管理</div>
+                                <div class="score-item-max">满分：4分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="container-image-management" min="0" max="4" value="0" data-section="2" data-max="4">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>容器镜像管理文档应包含Dockerfile最佳实践、镜像分层策略、镜像仓库使用指南、镜像版本控制和镜像安全扫描流程。优化的Dockerfile示例和完整的镜像生命周期管理是高分要点。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">性能测试报告</div>
+                                <div class="score-item-max">满分：3分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="performance-test" min="0" max="3" value="0" data-section="2" data-max="3">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>性能测试报告需提供容器化环境下的性能测试结果、性能瓶颈分析、资源使用监控数据和优化建议。包含传统环境与容器环境的性能对比分析是高分关键。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 客户端文档 -->
+                <div class="card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <i class="fas fa-mobile-alt"></i> 客户端文档评估
+                        </div>
+                        <div class="section-total">得分：<span id="section3-score">0</span>/<span id="section3-max">20</span></div>
+                    </div>
+                    
+                    <div class="section-progress">
+                        <div class="progress-bar" id="section3-progress"></div>
+                    </div>
+                    
+                    <div class="score-grid" id="section3-grid">
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">客户端版本文档</div>
+                                <div class="score-item-max">满分：5分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="client-version" min="0" max="5" value="0" data-section="3" data-max="5">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>客户端版本文档应包含版本兼容性矩阵、强制更新策略、客户端版本检测机制和版本回退支持情况。详细的客户端-服务端版本兼容性策略是高分关键。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">资源管理文档</div>
+                                <div class="score-item-max">满分：4分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="resource-management" min="0" max="4" value="0" data-section="3" data-max="4">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>资源管理文档需说明客户端资源打包策略、资源更新机制、CDN使用说明和资源缓存策略。高效的资源增量更新机制说明是高分要点。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">服务发现文档</div>
+                                <div class="score-item-max">满分：5分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="service-discovery" min="0" max="5" value="0" data-section="3" data-max="5">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>服务发现文档应详述客户端如何发现和连接到容器化服务、负载均衡策略、故障转移机制和服务地址更新流程。强大的服务故障转移策略是高分关键。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">安全需求文档</div>
+                                <div class="score-item-max">满分：4分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="security-requirements" min="0" max="4" value="0" data-section="3" data-max="4">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>安全需求文档需包含通信加密方案、认证授权机制、敏感数据处理策略和安全更新发布流程。全面的安全风险评估和缓解策略是高分要点。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <div class="score-item-header">
+                                <div class="score-item-name">客户端日志文档</div>
+                                <div class="score-item-max">满分：2分</div>
+                            </div>
+                            <div class="score-item-input">
+                                <input type="number" class="score-input" name="client-logs" min="0" max="2" value="0" data-section="3" data-max="2">
+                                <div class="score-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="tooltip">
+                                        <strong>评分标准：</strong>客户端日志文档应包含日志级别定义、日志收集机制、关键事件记录策略和日志分析方法。完整的客户端错误追踪系统说明是高分关键。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 评分结果 -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">评估结果</div>
+                    </div>
+                    
+                    <div class="result-summary">
+                        <div class="score-display">
+                            <div class="total-score" id="total-score">0</div>
+                            <div class="score-label">总分 / 100</div>
+                            <div class="grade-badge grade-d" id="grade-badge">D级</div>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="radar-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="grade-indicator">
+                        <div class="grade grade-a" id="grade-a">A级 (90-100) 低风险</div>
+                        <div class="grade grade-b" id="grade-b">B级 (75-89) 中低风险</div>
+                        <div class="grade grade-c" id="grade-c">C级 (60-74) 中高风险</div>
+                        <div class="grade grade-d active" id="grade-d">D级 (<60) 高风险</div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button type="button" id="save-btn" class="btn btn-secondary">
+                            <i class="fas fa-save"></i> 保存评估
+                        </button>
+                        <button type="button" id="result-btn" class="btn btn-primary">
+                            <i class="fas fa-file-alt"></i> 查看详细报告
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+    
+    <!-- 配置面板 -->
+    <div class="config-panel" id="config-panel">
+        <div class="config-header">
+            <div class="config-title">系统配置</div>
+            <button class="config-close" id="config-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="config-body">
+            <div class="config-section">
+                <div class="config-section-title">
+                    <i class="fas fa-cog"></i> 基本设置
+                </div>
+                <div class="config-form-row">
+                    <label>配置版本名称：</label>
+                    <input type="text" id="config-name" placeholder="例如：标准配置v1.0">
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <div class="config-section-title">
+                    <i class="fas fa-balance-scale"></i> 模块权重配置
+                </div>
+                <div class="config-form-row">
+                    <label>服务端文档权重：</label>
+                    <input type="number" id="section1-weight" min="1" max="80" value="50">
+                </div>
+                <div class="config-form-row">
+                    <label>容器化文档权重：</label>
+                    <input type="number" id="section2-weight" min="1" max="80" value="30">
+                </div>
+                <div class="config-form-row">
+                    <label>客户端文档权重：</label>
+                    <input type="number" id="section3-weight" min="1" max="80" value="20">
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <div class="config-section-title">
+                    <i class="fas fa-chart-line"></i> 风险等级阈值
+                </div>
+                <div class="config-form-row">
+                    <label>A级阈值：</label>
+                    <input type="number" id="threshold-a" min="75" max="100" value="90">
+                </div>
+                <div class="config-form-row">
+                    <label>B级阈值：</label>
+                    <input type="number" id="threshold-b" min="60" max="89" value="75">
+                </div>
+                <div class="config-form-row">
+                    <label>C级阈值：</label>
+                    <input type="number" id="threshold-c" min="1" max="74" value="60">
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <div class="config-section-title">
+                    <i class="fas fa-exclamation-triangle"></i> 缺失项判断阈值
+                </div>
+                <div class="config-form-row">
+                    <label>缺失判断阈值：</label>
+                    <input type="number" id="missing-threshold" min="0.1" max="0.9" step="0.05" value="0.6">
+                </div>
+            </div>
+        </div>
+        
+        <div class="config-actions">
+            <button id="reset-config" class="btn btn-secondary">重置默认</button>
+            <button id="save-config" class="btn btn-primary">保存配置</button>
+        </div>
+    </div>
+    
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title">操作成功</div>
+            <div class="toast-message">数据已保存</div>
+        </div>
+    </div>
+    
+    <script src="static/js/chart.min.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/config-system.js"></script>
+    <script src="js/dynamic-form-system.js"></script>
+    <script>
+        // 评分计算相关变量
+        let radarChart = null;
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化配置系统
+            if (typeof initConfigSystem === 'function') {
+                initConfigSystem();
+            }
+            
+            // 设置评分输入事件监听
+            initScoreInputs();
+            
+            // 设置按钮事件监听
+            initButtonEvents();
+            
+            // 更新加载选项
+            updateLoadOptions();
+            
+            // 初始化雷达图
+            initRadarChart();
+            
+            // 更新分数显示
+            updateScores();
+        });
+        
+        // 初始化评分输入
+        function initScoreInputs() {
+            const scoreInputs = document.querySelectorAll('.score-input');
+            
+            scoreInputs.forEach(input => {
+                // 输入范围限制
+                input.addEventListener('input', function() {
+                    const max = parseInt(this.dataset.max);
+                    const value = parseInt(this.value) || 0;
+                    
+                    if (value > max) {
+                        this.value = max;
+                    } else if (value < 0) {
+                        this.value = 0;
+                    }
+                    
+                    // 更新分数
+                    updateScores();
+                });
+            });
+        }
+        
+        // 初始化按钮事件
+        function initButtonEvents() {
+            // 保存评估按钮
+            const saveBtn = document.getElementById('save-btn');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', saveAssessment);
+            }
+            
+            // 查看详细报告按钮
+            const resultBtn = document.getElementById('result-btn');
+            if (resultBtn) {
+                resultBtn.addEventListener('click', viewDetailedResults);
+            }
+            
+            // 加载评估按钮
+            const loadBtn = document.getElementById('load-btn');
+            if (loadBtn) {
+                loadBtn.addEventListener('click', loadSelectedAssessment);
+            }
+        }
+        
+        // 初始化雷达图
+        function initRadarChart() {
+            const ctx = document.getElementById('radar-chart');
+            if (!ctx) return;
+            
+            const ctxContext = ctx.getContext('2d');
+            
+            radarChart = new Chart(ctxContext, {
+                type: 'radar',
+                data: {
+                    labels: ['服务端文档', '容器化文档', '客户端文档'],
+                    datasets: [{
+                        label: '完成度 (%)',
+                        data: [0, 0, 0],
+                        fill: true,
+                        backgroundColor: 'rgba(90, 65, 245, 0.2)',
+                        borderColor: 'rgba(90, 65, 245, 0.8)',
+                        pointBackgroundColor: '#5A41F5',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(90, 65, 245)',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            ticks: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 更新雷达图
+        function updateRadarChart() {
+            if (!radarChart) return;
+            
+            // 计算百分比得分
+            const scores = [
+                (window.sectionScores[1].current / window.sectionScores[1].max) * 100,
+                (window.sectionScores[2].current / window.sectionScores[2].max) * 100,
+                (window.sectionScores[3].current / window.sectionScores[3].max) * 100
+            ];
+            
+            // 更新数据
+            radarChart.data.datasets[0].data = scores;
+            radarChart.update();
+        }
+        
+        // 更新加载选项
+        function updateLoadOptions() {
+            const loadSelect = document.getElementById('load-data');
+            if (!loadSelect) return;
+            
+            // 清除现有选项
+            loadSelect.innerHTML = '<option value="">加载已保存的评估</option>';
+            
+            // 获取已保存的评估
+            const savedAssessments = JSON.parse(localStorage.getItem('containerAssessments') || '[]');
+            
+            // 按日期排序（最新的在前）
+            savedAssessments.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // 添加选项
+            savedAssessments.forEach(assessment => {
+                const option = document.createElement('option');
+                option.value = assessment.id;
+                const date = new Date(assessment.date).toLocaleDateString('zh-CN');
+                option.textContent = `${assessment.gameName} - ${assessment.versionNumber || ''} (${date})`;
+                loadSelect.appendChild(option);
+            });
+        }
+        
+        // 加载选定的评估
+        function loadSelectedAssessment() {
+            const loadSelect = document.getElementById('load-data');
+            if (!loadSelect) return;
+            
+            const selectedId = loadSelect.value;
+            
+            if (!selectedId) {
+                showToast('错误', '请选择要加载的评估', 'error');
+                return;
+            }
+            
+            // 获取已保存的评估
+            const savedAssessments = JSON.parse(localStorage.getItem('containerAssessments') || '[]');
+            const assessment = savedAssessments.find(a => a.id && a.id.toString() === selectedId);
+            
+            if (!assessment) {
+                showToast('错误', '未找到评估', 'error');
+                return;
+            }
+            
+            // 填充项目信息
+            document.getElementById('game-name').value = assessment.gameName || '';
+            document.getElementById('game-version').value = assessment.gameVersion || '';
+            document.getElementById('version-number').value = assessment.versionNumber || '';
+            
+            // 填充分数
+            const scores = assessment.scores || {};
+            const scoreInputs = document.querySelectorAll('.score-input');
+            
+            scoreInputs.forEach(input => {
+                const name = input.name;
+                input.value = scores[name] || 0;
+            });
+            
+            // 更新分数显示
+            updateScores();
+            
+            showToast('加载成功', '评估数据已加载');
+        }
+        
+        // 保存评估结果
+        function saveAssessment() {
+            const gameNameInput = document.getElementById('game-name');
+            if (!gameNameInput) {
+                console.error('找不到游戏名称输入框');
+                return;
+            }
+            
+            const gameName = gameNameInput.value;
+            
+            if (!gameName) {
+                showToast('错误', '请至少填写游戏名称', 'error');
+                return;
+            }
+            
+            // 收集评估数据
+            const gameVersionSelect = document.getElementById('game-version');
+            const versionNumberInput = document.getElementById('version-number');
+            
+            const gameVersion = gameVersionSelect ? gameVersionSelect.value : '';
+            const versionNumber = versionNumberInput ? versionNumberInput.value : '';
+            
+            // 收集所有分数
+            const scores = {};
+            const scoreInputs = document.querySelectorAll('.score-input');
+            
+            scoreInputs.forEach(input => {
+                scores[input.name] = parseInt(input.value) || 0;
+            });
+            
+            // 创建评估记录
+            const assessment = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                gameName,
+                gameVersion,
+                versionNumber,
+                scores,
+                totalScore: window.totalScore,
+                sectionScores: JSON.parse(JSON.stringify(window.sectionScores))
+            };
+            
+            if (typeof currentConfig !== 'undefined') {
+                assessment.config = {
+                    version: currentConfig.version,
+                    name: currentConfig.name,
+                    thresholds: currentConfig.gradeThresholds
+                };
+            }
+            
+            // 获取已有记录
+            const savedAssessments = JSON.parse(localStorage.getItem('containerAssessments') || '[]');
+            savedAssessments.push(assessment);
+            
+            // 保存到本地存储
+            localStorage.setItem('containerAssessments', JSON.stringify(savedAssessments));
+            
+            // 更新加载选项
+            updateLoadOptions();
+            
+            showToast('保存成功', '评估已保存到历史记录');
+        }
+        
+        // 查看详细结果
+        function viewDetailedResults() {
+            const gameNameInput = document.getElementById('game-name');
+            if (!gameNameInput) {
+                console.error('找不到游戏名称输入框');
+                return;
+            }
+            
+            const gameName = gameNameInput.value;
+            
+            if (!gameName) {
+                showToast('错误', '请至少填写游戏名称', 'error');
+                return;
+            }
+            
+            // 收集所有分数
+            const scores = {};
+            const scoreInputs = document.querySelectorAll('.score-input');
+            
+            scoreInputs.forEach(input => {
+                scores[input.name] = parseInt(input.value) || 0;
+            });
+            
+            // 创建评估数据
+            const assessment = {
+                date: new Date().toISOString(),
+                gameName: document.getElementById('game-name').value,
+                gameVersion: document.getElementById('game-version').value,
+                versionNumber: document.getElementById('version-number').value,
+                scores,
+                totalScore: window.totalScore,
+                sectionScores: JSON.parse(JSON.stringify(window.sectionScores))
+            };
+            
+            if (typeof currentConfig !== 'undefined') {
+                assessment.config = {
+                    version: currentConfig.version,
+                    name: currentConfig.name,
+                    thresholds: currentConfig.gradeThresholds
+                };
+            }
+            
+            // 将评估数据存储在会话存储中
+            sessionStorage.setItem('currentAssessment', JSON.stringify(assessment));
+            
+            // 跳转到结果页面
+            window.location.href = 'result.html';
+        }
+    </script>
+</body>
+</html>

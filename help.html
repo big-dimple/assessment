@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>帮助指南</title>
+    <link rel="stylesheet" href="static/css/font-awesome/all.min.css">
+    <link rel="stylesheet" href="styles/unified-styles.css">
+    <style>
+        /* 页面特定样式 */
+        .help-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        /* 左侧导航 */
+        .help-nav {
+            width: 220px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 16px;
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .help-nav-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .help-nav-list {
+            list-style: none;
+        }
+
+        .help-nav-item {
+            margin-bottom: 4px;
+        }
+
+        .help-nav-link {
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .help-nav-link:hover,
+        .help-nav-link.active {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+
+        .help-nav-sub {
+            list-style: none;
+            padding-left: 20px;
+            margin-top: 4px;
+            margin-bottom: 8px;
+            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .help-nav-sub.open {
+            display: block;
+            max-height: 500px;
+        }
+
+        .help-nav-sub-item {
+            margin-bottom: 2px;
+        }
+
+        .help-nav-sub-link {
+            display: block;
+            padding: 6px 12px;
+            border-radius: 4px;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 13px;
+        }
+
+        .help-nav-sub-link:hover,
+        .help-nav-sub-link.active {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+
+        /* 帮助内容 */
+        .help-content {
+            flex: 1;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .help-section {
+            margin-bottom: 40px;
+        }
+
+        .help-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .help-section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-color);
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .help-sub-section {
+            margin-bottom: 24px;
+        }
+
+        .help-sub-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--primary-color);
+        }
+
+        .help-text {
+            font-size: 15px;
+            margin-bottom: 12px;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .help-list {
+            padding-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        .help-list li {
+            margin-bottom: 8px;
+        }
+
+        .help-note {
+            background-color: rgba(90, 65, 245, 0.05);
+            border-left: 3px solid var(--primary-color);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .help-warning {
+            background-color: rgba(217, 119, 6, 0.05);
+            border-left: 3px solid var(--warning-color);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .help-tip {
+            background-color: rgba(56, 161, 105, 0.05);
+            border-left: 3px solid var(--success-color);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* 表格样式 */
+        .help-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .help-table th,
+        .help-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .help-table th {
+            font-weight: 500;
+            background-color: var(--bg-color);
+        }
+
+        .help-table tr:hover {
+            background-color: var(--bg-color);
+        }
+
+        /* 折叠面板 */
+        .help-collapse {
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .help-collapse-header {
+            padding: 12px 16px;
+            background-color: var(--bg-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .help-collapse-title {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .help-collapse-content {
+            padding: 16px;
+            display: none;
+        }
+
+        .help-collapse.open .help-collapse-content {
+            display: block;
+        }
+
+        .help-collapse-icon {
+            transition: transform 0.2s;
+        }
+
+        .help-collapse.open .help-collapse-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 代码示例 */
+        .help-code {
+            background-color: var(--bg-color);
+            padding: 16px;
+            border-radius: var(--border-radius);
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+            white-space: pre;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        /* 搜索框 */
+        .help-search {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .help-search input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .help-search input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(90, 65, 245, 0.1);
+            outline: none;
+        }
+
+        .help-search i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        /* 返回顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: var(--transition);
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .help-container {
+                flex-direction: column;
+            }
+            
+            .help-nav {
+                width: 100%;
+                position: static;
+                max-height: none;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-cube"></i>
+                    <span>游戏上线评估系统</span>
+                </div>
+                <div class="sidebar-sub">运维团队</div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <ul>
+                    <li><a href="index.html" id="nav-assessment"><i class="fas fa-clipboard-list"></i> <span>评估打分</span></a></li>
+                    <li>
+                        <div class="menu-toggle" id="history-toggle">
+                            <div>
+                                <i class="fas fa-history"></i>
+                                <span>历史评估</span>
+                            </div>
+                            <i class="fas fa-chevron-right toggle-icon"></i>
+                        </div>
+                        <ul class="sub-menu" id="history-submenu">
+                            <li><a href="historical-evaluations.html" id="nav-history-list"><i class="fas fa-list"></i> <span>评估列表</span></a></li>
+                            <li><a href="historical-evaluations.html#analytics-summary" id="nav-analytics"><i class="fas fa-chart-bar"></i> <span>数据分析</span></a></li>
+                        </ul>
+                    </li>
+                    <li><a href="help.html" id="nav-help"><i class="fas fa-question-circle"></i> <span>帮助指南</span></a></li>
+                    <li><a href="#" class="config-link"><i class="fas fa-cog"></i> <span>系统配置</span></a></li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <p>© 2025 游戏运维精英社</p>
+            </div>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-title-group">
+                    <h1 class="page-title">帮助指南</h1>
+                    <p class="page-description" id="current-date">2025年4月27日</p>
+                </div>
+                <div class="page-actions">
+                    <button id="print-button" class="btn btn-secondary">
+                        <i class="fas fa-print"></i> 打印指南
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 搜索框 -->
+            <div class="help-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="help-search-input" placeholder="搜索帮助内容...">
+            </div>
+            
+            <div class="help-container">
+                <!-- 左侧导航 -->
+                <div class="help-nav">
+                    <div class="help-nav-title">目录</div>
+                    <ul class="help-nav-list">
+                        <li class="help-nav-item">
+                            <a href="#system-intro" class="help-nav-link active">系统介绍</a>
+                        </li>
+                        <li class="help-nav-item">
+                            <a href="#assessment-guide" class="help-nav-link">评估指南</a>
+                            <ul class="help-nav-sub open">
+                                <li class="help-nav-sub-item">
+                                    <a href="#assessment-process" class="help-nav-sub-link">评估流程</a>
+                                </li>
+                                <li class="help-nav-sub-item">
+                                    <a href="#scoring-standards" class="help-nav-sub-link">评分标准</a>
+                                </li>
+                                <li class="help-nav-sub-item">
+                                    <a href="#risk-levels" class="help-nav-sub-link">风险等级说明</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="help-nav-item">
+                            <a href="#doc-standards" class="help-nav-link">文档标准</a>
+                            <ul class="help-nav-sub">
+                                <li class="help-nav-sub-item">
+                                    <a href="#server-docs" class="help-nav-sub-link">服务端文档标准</a>
+                                </li>
+                                <li class="help-nav-sub-item">
+                                    <a href="#container-docs" class="help-nav-sub-link">容器化文档标准</a>
+                                </li>
+                                <li class="help-nav-sub-item">
+                                    <a href="#client-docs" class="help-nav-sub-link">客户端文档标准</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="help-nav-item">
+                            <a href="#best-practices" class="help-nav-link">最佳实践</a>
+                            <ul class="help-nav-sub">
+                                <li class="help-nav-sub-item">
+                                    <a href="#team-collaboration" class="help-nav-sub-link">团队协作</a>
+                                </li>
+                                <li class="help-nav-sub-item">
+                                    <a href="#improvement-tracking" class="help-nav-sub-link">改进跟踪</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="help-nav-item">
+                            <a href="#faqs" class="help-nav-link">常见问题</a>
+                        </li>
+                        <li class="help-nav-item">
+                            <a href="#appendix" class="help-nav-link">附录</a>
+                            <ul class="help-nav-sub">
+                                <li class="help-nav-sub-item">
+                                    <a href="#doc-templates" class="help-nav-sub-link">文档模板</a>
+                                </li>
+                                <li class="help-nav-sub-item">
+                                    <a href="#glossary" class="help-nav-sub-link">术语表</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- 帮助内容 -->
+                <div class="help-content">
+                    <!-- 系统介绍 -->
+                    <div id="system-intro" class="help-section">
+                        <h2 class="help-section-title">系统介绍</h2>
+                        <div class="help-text">
+                            <p>游戏就绪度评估系统是一个专为游戏团队设计的工具，用于评估游戏项目所需的技术准备工作完成度。本系统帮助研发与运维团队在项目容器化过程中统一标准，识别风险点，提前规避潜在问题。</p>
+                        </div>
+                        
+                        <div class="help-sub-section">
+                            <h3 class="help-sub-title">系统目标</h3>
+                            <ul class="help-list">
+                                <li>标准化容器化部署前的文档检查流程</li>
+                                <li>提供客观、可量化的评估标准</li>
+                                <li>帮助识别文档准备和技术实现中的风险点</li>
+                                <li>促进研发与运维团队之间的有效沟通</li>
+                                <li>追踪项目容器化准备过程中的改进情况</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="help-sub-section">
+                            <h3 class="help-sub-title">主要功能</h3>
+                            <ul class="help-list">
+                                <li><strong>评估打分</strong>：对服务端、容器化特定和客户端文档进行评分</li>
+                                <li><strong>历史记录</strong>：保存查看历史评估结果，支持数据导出</li>
+                                <li><strong>分析报告</strong>：综合分析多个项目的评估数据，生成趋势报告</li>
+                                <li><strong>系统配置</strong>：可自定义评分标准和权重</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="help-note">
+                            <p><strong>注意：</strong>本系统的评估结果仅作为容器化部署决策的参考依据之一，最终决策应结合实际情况，由项目管理层和技术负责人共同制定。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 评估指南 -->
+                    <div id="assessment-guide" class="help-section">
+                        <h2 class="help-section-title">评估指南</h2>
+                        
+                        <div id="assessment-process" class="help-sub-section">
+                            <h3 class="help-sub-title">评估流程</h3>
+                            <div class="help-text">
+                                <p>完整的评估流程包括以下几个步骤：</p>
+                            </div>
+                            <ol class="help-list">
+                                <li><strong>准备文档</strong>：收集所有相关的技术文档，确保文档内容最新</li>
+                                <li><strong>组织评估</strong>：组织研发、运维、QA等相关人员参与评估</li>
+                                <li><strong>输入项目信息</strong>：在评估页面填写游戏名称、版本类型和版本号</li>
+                                <li><strong>逐项评分</strong>：按照标准对各文档项目进行评分</li>
+                                <li><strong>生成报告</strong>：系统自动计算总分并生成风险评估报告</li>
+                                <li><strong>制定改进计划</strong>：根据评估结果，针对薄弱环节制定改进计划</li>
+                                <li><strong>跟踪改进</strong>：定期重新评估，跟踪改进进度</li>
+                            </ol>
+                            
+                            <div class="help-tip">
+                                <p><strong>最佳实践：</strong>建议在项目重要节点（如首版开发完成、大版本更新前）进行评估，而不是等到临近上线时才开始准备。</p>
+                            </div>
+                        </div>
+                        
+                        <div id="scoring-standards" class="help-sub-section">
+                            <h3 class="help-sub-title">评分标准</h3>
+                            <div class="help-text">
+                                <p>评分采用0到满分制，每个文档项根据其完整性、准确性和实用性评分：</p>
+                            </div>
+                            
+                            <table class="help-table">
+                                <thead>
+                                    <tr>
+                                        <th width="20%">得分比例</th>
+                                        <th width="25%">完成度评价</th>
+                                        <th width="55%">标准说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>90-100%</td>
+                                        <td>优秀</td>
+                                        <td>文档全面、准确、详细，包含所有必要信息，实用性强，可直接指导实施</td>
+                                    </tr>
+                                    <tr>
+                                        <td>75-89%</td>
+                                        <td>良好</td>
+                                        <td>文档基本完整，主要信息清晰，但可能缺少部分细节或边界条件说明</td>
+                                    </tr>
+                                    <tr>
+                                        <td>60-74%</td>
+                                        <td>基本达标</td>
+                                        <td>文档涵盖主要内容，但存在明显缺失，可能需要额外咨询才能实施</td>
+                                    </tr>
+                                    <tr>
+                                        <td>30-59%</td>
+                                        <td>不足</td>
+                                        <td>文档内容粗略，缺失重要信息，无法有效指导实施</td>
+                                    </tr>
+                                    <tr>
+                                        <td>0-29%</td>
+                                        <td>严重缺失</td>
+                                        <td>文档几乎不存在或内容错误，完全无法使用</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="help-text">
+                                <p>在评分过程中，对于不同的文档项，可以参考每个评分项旁边的帮助提示，了解该项的具体评分要点。</p>
+                            </div>
+                        </div>
+                        
+                        <div id="risk-levels" class="help-sub-section">
+                            <h3 class="help-sub-title">风险等级说明</h3>
+                            <div class="help-text">
+                                <p>系统根据总评分将项目分为四个风险等级：</p>
+                            </div>
+                            
+                            <div class="help-collapse">
+                                <div class="help-collapse-header">
+                                    <div class="help-collapse-title">A级（90-100分）- 风险等级：低</div>
+                                    <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                                </div>
+                                <div class="help-collapse-content">
+                                    <p>文档准备充分完整，各系统组件间依赖关系清晰，容器化部署所需的所有技术要点都已覆盖。当前状态下可以安排上线，预期不会出现严重问题。</p>
+                                    <p><strong>建议：</strong>持续关注运行状态，并根据实际运行情况进一步优化容器化配置。</p>
+                                </div>
+                            </div>
+                            
+                            <div class="help-collapse">
+                                <div class="help-collapse-header">
+                                    <div class="help-collapse-title">B级（75-89分）- 风险等级：中低</div>
+                                    <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                                </div>
+                                <div class="help-collapse-content">
+                                    <p>文档准备较为充分，但有少量细节缺失。存在一定风险，但通过合理的规划和监控可以有效管理。</p>
+                                    <p><strong>建议：</strong>补充完善缺失的文档项后再上线，或在上线过程中特别关注相关风险点，并制定应对策略。</p>
+                                </div>
+                            </div>
+                            
+                            <div class="help-collapse">
+                                <div class="help-collapse-header">
+                                    <div class="help-collapse-title">C级（60-74分）- 风险等级：中高</div>
+                                    <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                                </div>
+                                <div class="help-collapse-content">
+                                    <p>文档准备不足，存在明显风险。虽然勉强可以上线，但在实际运行中可能会遇到较多问题，影响游戏稳定性和用户体验。</p>
+                                    <p><strong>建议：</strong>如果必须按期上线，请务必做好应急预案，并在上线后迅速补充完善文档。建议考虑延期上线，优先完善关键文档。</p>
+                                </div>
+                            </div>
+                            
+                            <div class="help-collapse">
+                                <div class="help-collapse-header">
+                                    <div class="help-collapse-title">D级（低于60分）- 风险等级：高</div>
+                                    <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                                </div>
+                                <div class="help-collapse-content">
+                                    <p>文档准备严重不足，核心文档缺失。上线将面临严重风险，包括但不限于系统不稳定、性能问题、数据丢失、服务中断等。</p>
+                                    <p><strong>建议：</strong>不建议上线，必须完善核心文档后再考虑上线。继续推进上线计划可能导致严重后果，影响游戏声誉和商业利益。</p>
+                                </div>
+                            </div>
+                            
+                            <div class="help-warning">
+                                <p><strong>重要提示：</strong>当评估结果为D级时，强烈建议暂停上线计划，优先完善核心文档。即使有明确的商业压力，也应至少将评分提升至C级以上再考虑上线，同时制定完善的风险应对措施。</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 文档标准 -->
+                    <div id="doc-standards" class="help-section">
+                        <h2 class="help-section-title">文档标准</h2>
+                        <div class="help-text">
+                            <p>本系统评估的文档分为三大类：服务端文档、容器化特定文档和客户端文档。以下是各类文档的详细标准说明。</p>
+                        </div>
+                        
+                        <div id="server-docs" class="help-sub-section">
+                            <h3 class="help-sub-title">服务端文档标准</h3>
+                            
+                            <div class="help-collapse">
+                                <div class="help-collapse-header">
+                                    <div class="help-collapse-title">系统架构文档</div>
+                                    <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                                </div>
+                                <div class="help-collapse-content">
+                                    <p><strong>目的：</strong>描述整体系统架构，帮助运维团队理解系统组件及其关系。</p>
+                                    <p><strong>应包含内容：</strong></p>
+                                    <ul class="help-list">
+                                        <li>系统组件关系图（必须）</li>
+                                        <li>各模块功能描述（必须）</li>
+                                        <li>系统间交互流程图（必须）</li>
+                                        <li>技术栈详情（必须）</li>
+                                        <li>系统依赖说明（必须）</li>
+                                        <li>扩展点和未来规划（可选）</li>
+                                        <li>历史架构变更记录（可选）</li>
+                                    </ul>
+                                    <p><strong>良好实践示例：</strong>架构图应使用标准符号，清晰标注通信方式、数据流向和部署单元；模块说明应包括职责边界和资源需求。</p>
+                                </div>
+                            </div>
+                            
+                            <div class="help-collapse">
+                                <div class="help-collapse-header">
+                                    <div class="help-collapse-title">部署需求文档</div>
+                                    <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                                </div>
+                                <div class="help-collapse-content">
+                                    <p><strong>目的：</strong>明确部署环境要求和流程，确保系统能够正确部署。</p>
+                                    <p><strong>应包含内容：</strong></p>
+                                    <ul class="help-list">
+                                        <li>硬件资源需求（CPU、内存、存储等）（必须）</li>
+                                        <li>软件依赖（操作系统、中间件等）（必须）</li>
+                                        <li>网络要求（端口、带宽、延迟敏感度）（必须）</li>
+                                        <li>部署步骤和脚本（必须）</li>
+                                        <li>验证方法（必须）</li>
+                                        <li>资源估算方法（可选）</li>
+                                        <li>环境差异说明（开发、测试、生产）（可选）</li>
+                                    </ul>
+                                    <p><strong>良好实践示例：</strong>提供可执行的部署脚本或详细的手动步骤说明；明确不同规模下的资源需求估算方法；提供部署验证的具体指标和方法。</p>
+                                </div>
+                            </div>
+                            
+                            <!-- 更多服务端文档项省略 -->
+                            <div class="help-text">
+                                <p>以上仅为部分服务端文档标准示例，完整标准请在评分界面点击各项目旁的帮助图标查看。</p>
+                            </div>
+                        </div>
+                        
+                        <div id="container-docs" class="help-sub-section">
+                            <h3 class="help-sub-title">容器化特定文档标准</h3>
+                            
+                            <div class="help-collapse">
+                                <div class="help-collapse-header">
+                                    <div class="help-collapse-title">容器编排需求</div>
+                                    <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                                </div>
+                                <div class="help-collapse-content">
+                                    <p><strong>目的：</strong>定义容器间依赖关系和编排策略，确保容器化环境中各组件协同工作。</p>
+                                    <p><strong>应包含内容：</strong></p>
+                                    <ul class="help-list">
+                                        <li>容器间依赖关系图（必须）</li>
+                                        <li>启动顺序和等待策略（必须）</li>
+                                        <li>扩缩容策略（必须）</li>
+                                        <li>资源分配建议（必须）</li>
+                                        <li>健康检查设置（必须）</li>
+                                        <li>服务发现配置（必须）</li>
+                                        <li>故障转移策略（可选）</li>
+                                        <li>编排工具选择依据（可选）</li>
+                                    </ul>
+                                    <p><strong>良好实践示例：</strong>提供Kubernetes或Docker Compose配置文件示例；详细说明各服务的资源需求和扩缩容触发条件；提供完整的健康检查配置参数和检查逻辑。</p>
+                                </div>
+                            </div>
+                            
+                            <div class="help-collapse">
+                                <div class="help-collapse-header">
+                                    <div class="help-collapse-title">持久化存储方案</div>
+                                    <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                                </div>
+                                <div class="help-collapse-content">
+                                    <p><strong>目的：</strong>说明数据持久化需求和存储解决方案，确保容器重启或迁移后数据不丢失。</p>
+                                    <p><strong>应包含内容：</strong></p>
+                                    <ul class="help-list">
+                                        <li>存储需求估算（数据量、增长率等）（必须）</li>
+                                        <li>存储卷类型选择（必须）</li>
+                                        <li>数据备份策略（必须）</li>
+                                        <li>数据持久性要求（必须）</li>
+                                        <li>存储性能参数（必须）</li>
+                                        <li>多环境存储差异（可选）</li>
+                                        <li>存储成本估算（可选）</li>
+                                    </ul>
+                                    <p><strong>良好实践示例：</strong>提供不同数据类型（如日志、用户数据、配置等）的存储策略；明确定义备份频率和保留策略；提供存储性能测试结果。</p>
+                                </div>
+                            </div>
+                            
+                            <!-- 更多容器化文档项省略 -->
+                            <div class="help-text">
+                                <p>以上仅为部分容器化文档标准示例，完整标准请在评分界面点击各项目旁的帮助图标查看。</p>
+                            </div>
+                        </div>
+                        
+                        <div id="client-docs" class="help-sub-section">
+                            <h3 class="help-sub-title">客户端文档标准</h3>
+                            
+                            <div class="help-collapse">
+                                <div class="help-collapse-header">
+                                    <div class="help-collapse-title">客户端版本文档</div>
+                                    <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                                </div>
+                                <div class="help-collapse-content">
+                                    <p><strong>目的：</strong>说明客户端版本控制和兼容性管理，确保容器化后服务端与客户端正确匹配。</p>
+                                    <p><strong>应包含内容：</strong></p>
+                                    <ul class="help-list">
+                                        <li>版本兼容性矩阵（必须）</li>
+                                        <li>强制更新策略（必须）</li>
+                                        <li>客户端版本检测机制（必须）</li>
+                                        <li>版本回退支持情况（必须）</li>
+                                        <li>API版本管理策略（必须）</li>
+                                        <li>分区发布策略（可选）</li>
+                                        <li>版本升级率监控方案（可选）</li>
+                                    </ul>
+                                    <p><strong>良好实践示例：</strong>提供详细的客户端-服务端版本兼容性矩阵；说明不同API版本的废弃计划；定义明确的强制更新触发条件和实现方式。</p>
+                                </div>
+                            </div>
+                            
+                            <!-- 更多客户端文档项省略 -->
+                            <div class="help-text">
+                                <p>以上仅为部分客户端文档标准示例，完整标准请在评分界面点击各项目旁的帮助图标查看。</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 最佳实践 -->
+                    <div id="best-practices" class="help-section">
+                        <h2 class="help-section-title">最佳实践</h2>
+                        
+                        <div id="team-collaboration" class="help-sub-section">
+                            <h3 class="help-sub-title">团队协作</h3>
+                            <div class="help-text">
+                                <p>容器化就绪度评估应该是一个团队协作的过程，而不仅仅是运维团队的工作。以下是一些团队协作的最佳实践：</p>
+                            </div>
+                            
+                            <ul class="help-list">
+                                <li><strong>组建跨职能评估小组</strong>：包括研发、运维、测试、产品等角色，确保从不同角度评估文档</li>
+                                <li><strong>明确责任分工</strong>：为每个文档项指定负责人，确保评估和改进有明确的责任归属</li>
+                                <li><strong>定期评估会议</strong>：建立定期评估机制，跟踪改进进度</li>
+                                <li><strong>文档优先文化</strong>：在开发初期就开始准备文档，避免临近上线时紧急补充</li>
+                                <li><strong>知识共享</strong>：组织内部培训，解释容器化部署的关键概念和最佳实践</li>
+                            </ul>
+                            
+                            <div class="help-tip">
+                                <p><strong>提示：</strong>考虑将评估结果作为项目里程碑的一部分，例如在项目进入测试阶段前要求达到至少B级评估结果。</p>
+                            </div>
+                        </div>
+                        
+                        <div id="improvement-tracking" class="help-sub-section">
+                            <h3 class="help-sub-title">改进跟踪</h3>
+                            <div class="help-text">
+                                <p>评估的目的是识别问题并推动改进。以下是有效跟踪改进的方法：</p>
+                            </div>
+                            
+                            <ul class="help-list">
+                                <li><strong>建立改进计划</strong>：根据评估结果制定详细的改进计划，包括时间表和责任人</li>
+                                <li><strong>分阶段改进</strong>：优先解决高风险、高影响的文档缺失，逐步提升评估得分</li>
+                                <li><strong>定期重新评估</strong>：每完成一批改进后，重新进行评估，验证进度</li>
+                                <li><strong>记录历史评估</strong>：使用系统的历史记录功能，对比不同时间点的评估结果</li>
+                                <li><strong>总结经验教训</strong>：在项目结束后，总结文档准备过程中的经验教训，形成组织知识库</li>
+                            </ul>
+                            
+                            <div class="help-code">
+# 改进计划示例
+项目名称：幻境冒险记
+评估日期：2025-04-15
+当前评级：C级 (65分)
+目标评级：B级 (≥75分)
+
+## 高优先级改进项
+1. 网络方案文档 - 当前得分：2/6
+   - 补充容器间通信模式详述（责任人：张工）
+   - 添加网络策略配置示例（责任人：李工）
+   - 完成日期：2025-04-22
+
+2. 持久化存储方案 - 当前得分：2/6
+   - 补充存储性能参数测试结果（责任人：王工）
+   - 完善数据备份与恢复流程（责任人：赵工）
+   - 完成日期：2025-04-25
+
+## 中优先级改进项
+...
+</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 常见问题 -->
+                    <div id="faqs" class="help-section">
+                        <h2 class="help-section-title">常见问题</h2>
+                        
+                        <div class="help-collapse">
+                            <div class="help-collapse-header">
+                                <div class="help-collapse-title">如何确定评分的客观性？</div>
+                                <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                            </div>
+                            <div class="help-collapse-content">
+                                <p>为确保评分的客观性，建议：</p>
+                                <ul class="help-list">
+                                    <li>由多人共同参与评分，减少个人主观因素</li>
+                                    <li>严格参照系统提供的评分标准和帮助提示</li>
+                                    <li>使用具体的检查项清单，将主观判断转化为客观指标</li>
+                                    <li>对于有争议的项目，可以请第三方专家参与评审</li>
+                                </ul>
+                                <p>系统设计的评分标准尽量细化和量化，但评分过程仍然会有主观因素。重要的是评分过程的一致性，即对不同项目采用相同的标准。</p>
+                            </div>
+                        </div>
+                        
+                        <div class="help-collapse">
+                            <div class="help-collapse-header">
+                                <div class="help-collapse-title">已有线上游戏如何评估容器化迁移就绪度？</div>
+                                <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                            </div>
+                            <div class="help-collapse-content">
+                                <p>对于已有线上游戏的容器化迁移，除了标准评估项外，还应特别关注：</p>
+                                <ul class="help-list">
+                                    <li>迁移策略文档：描述如何从现有部署方式迁移到容器化部署</li>
+                                    <li>数据迁移方案：确保数据在迁移过程中的完整性和一致性</li>
+                                    <li>回滚计划：如果容器化部署出现问题，如何快速回退到原部署方式</li>
+                                    <li>性能对比分析：容器化前后的性能对比测试结果</li>
+                                    <li>灰度发布策略：如何逐步将流量迁移到容器化环境</li>
+                                </ul>
+                                <p>建议在系统配置中增加迁移相关的评估项，并根据项目特点调整权重。</p>
+                            </div>
+                        </div>
+                        
+                        <div class="help-collapse">
+                            <div class="help-collapse-header">
+                                <div class="help-collapse-title">小型项目是否需要准备所有文档？</div>
+                                <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                            </div>
+                            <div class="help-collapse-content">
+                                <p>小型项目可以根据实际情况适当简化文档，但核心文档仍然不应缺失。可以考虑：</p>
+                                <ul class="help-list">
+                                    <li>合并相关文档，如将部署需求与配置管理合并</li>
+                                    <li>简化文档内容，但保留关键信息</li>
+                                    <li>使用系统配置功能，调整各文档项的权重</li>
+                                </ul>
+                                <p>即使是小型项目，也应确保以下核心文档的完备性：系统架构文档、容器编排需求、网络方案和持久化存储方案。这些是容器化部署成功的基础保障。</p>
+                            </div>
+                        </div>
+                        
+                        <div class="help-collapse">
+                            <div class="help-collapse-header">
+                                <div class="help-collapse-title">如何处理评估结果与项目进度之间的冲突？</div>
+                                <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                            </div>
+                            <div class="help-collapse-content">
+                                <p>当评估结果显示项目未就绪，但项目进度安排要求尽快上线时：</p>
+                                <ul class="help-list">
+                                    <li>将评估结果与具体风险点清晰传达给决策者，确保决策基于充分信息</li>
+                                    <li>优先补充高风险点相关的文档，集中资源解决最关键问题</li>
+                                    <li>制定详细的风险应对预案，针对可能出现的问题准备解决方案</li>
+                                    <li>考虑采用灰度发布策略，逐步验证容器化部署的稳定性</li>
+                                    <li>安排额外的技术支持资源，在上线初期加强监控和快速响应</li>
+                                </ul>
+                                <p>最终决策应权衡业务需求与技术风险，但评估系统的目的是提供客观的风险评估，帮助做出明智决策。</p>
+                            </div>
+                        </div>
+                        
+                        <div class="help-collapse">
+                            <div class="help-collapse-header">
+                                <div class="help-collapse-title">评估数据会保存多久？</div>
+                                <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                            </div>
+                            <div class="help-collapse-content">
+                                <p>评估系统将评估数据保存在浏览器的本地存储中。这意味着：</p>
+                                <ul class="help-list">
+                                    <li>数据会永久保存，除非手动删除或清除浏览器数据</li>
+                                    <li>数据仅存储在当前使用的设备和浏览器中，不会自动跨设备同步</li>
+                                    <li>如需长期保存或共享数据，建议使用系统的导出功能，将数据导出为JSON文件</li>
+                                </ul>
+                                <p>为避免数据丢失，建议定期导出重要的评估记录，特别是在浏览器升级或设备更换前。</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 附录 -->
+                    <div id="appendix" class="help-section">
+                        <h2 class="help-section-title">附录</h2>
+                        
+                        <div id="doc-templates" class="help-sub-section">
+                            <h3 class="help-sub-title">文档模板</h3>
+                            <div class="help-text">
+                                <p>以下提供几个核心文档的模板框架，可作为文档编写的参考：</p>
+                            </div>
+                            
+                            <div class="help-collapse">
+                                <div class="help-collapse-header">
+                                    <div class="help-collapse-title">系统架构文档模板</div>
+                                    <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                                </div>
+                                <div class="help-collapse-content">
+                                    <div class="help-code">
+# 系统架构文档
+
+## 1. 文档信息
+- 文档版本：v1.0
+- 更新日期：YYYY-MM-DD
+- 责任人：xxx
+
+## 2. 系统概述
+- 系统名称
+- 系统简介
+- 业务背景
+- 主要功能
+
+## 3. 系统架构图
+- 全局架构图
+- 主要组件说明
+- 部署单元划分
+
+## 4. 模块说明
+### 4.1 模块A
+- 功能职责
+- 内部结构
+- 资源需求
+- 关键算法/技术
+
+### 4.2 模块B
+...
+
+## 5. 系统交互
+- 交互流程图
+- 关键接口说明
+- 数据流向说明
+
+## 6. 技术栈说明
+- 开发语言
+- 框架选型
+- 中间件选择
+- 存储方案
+
+## 7. 系统依赖
+- 内部系统依赖
+- 外部系统依赖
+- 第三方服务依赖
+
+## 8. 扩展设计
+- 扩展点说明
+- 未来规划
+- 技术演进路线
+
+## 9. 附录
+- 术语表
+- 参考资料
+- 历史版本记录</div>
+                                </div>
+                            </div>
+                            
+                            <div class="help-collapse">
+                                <div class="help-collapse-header">
+                                    <div class="help-collapse-title">容器编排需求模板</div>
+                                    <div class="help-collapse-icon"><i class="fas fa-chevron-down"></i></div>
+                                </div>
+                                <div class="help-collapse-content">
+                                    <div class="help-code">
+# 容器编排需求文档
+
+## 1. 文档信息
+- 文档版本：v1.0
+- 更新日期：YYYY-MM-DD
+- 责任人：xxx
+
+## 2. 容器化架构
+- 容器化架构图
+- 服务划分说明
+- 容器编排工具选型
+
+## 3. 容器依赖关系
+- 依赖关系图
+- 启动顺序要求
+- 等待策略
+
+## 4. 资源需求
+- CPU需求（最小/推荐/最大）
+- 内存需求（最小/推荐/最大）
+- 存储需求
+- 网络需求
+
+## 5. 扩缩容策略
+- 扩容触发条件
+- 缩容触发条件
+- 最小/最大实例数设置
+- 自动扩缩容配置
+
+## 6. 健康检查
+- 健康检查端点
+- 健康检查参数
+- 健康检查逻辑
+- 失败处理策略
+
+## 7. 服务发现
+- 服务注册方式
+- 服务发现机制
+- 服务元数据
+
+## 8. 编排配置示例
+```yaml
+# Kubernetes或Docker Compose配置示例
+```
+
+## 9. 故障处理
+- 故障转移策略
+- 恢复机制
+- 常见问题及解决方案
+
+## 10. 附录
+- 术语表
+- 参考资料
+- 配置参数详解</div>
+                                </div>
+                            </div>
+                            
+                            <!-- 更多模板省略 -->
+                            <div class="help-text">
+                                <p>上述模板仅供参考，实际文档应根据项目特点和组织标准进行调整。</p>
+                            </div>
+                        </div>
+                        
+                        <div id="glossary" class="help-sub-section">
+                            <h3 class="help-sub-title">术语表</h3>
+                            
+                            <table class="help-table">
+                                <thead>
+                                    <tr>
+                                        <th width="20%">术语</th>
+                                        <th width="80%">解释</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>容器</td>
+                                        <td>一种轻量级、可移植、自包含的软件执行环境，包含应用程序及其所有依赖项，使应用程序能够在几乎任何环境中一致地运行。</td>
+                                    </tr>
+                                    <tr>
+                                        <td>容器编排</td>
+                                        <td>自动化容器的部署、管理、扩展和联网的过程。常用的容器编排工具包括Kubernetes、Docker Swarm等。</td>
+                                    </tr>
+                                    <tr>
+                                        <td>持久化存储</td>
+                                        <td>在容器生命周期之外持久保存数据的机制，确保容器重启或迁移后数据不丢失。</td>
+                                    </tr>
+                                    <tr>
+                                        <td>服务发现</td>
+                                        <td>在分布式系统中自动检测服务实例的机制，使服务能够相互发现并通信。</td>
+                                    </tr>
+                                    <tr>
+                                        <td>健康检查</td>
+                                        <td>定期检查服务是否正常运行的机制，用于确定服务的可用性和是否需要重启或替换。</td>
+                                    </tr>
+                                    <tr>
+                                        <td>CI/CD</td>
+                                        <td>持续集成/持续部署，自动化软件交付过程的实践，包括代码构建、测试和部署。</td>
+                                    </tr>
+                                    <tr>
+                                        <td>容器镜像</td>
+                                        <td>包含应用程序及其依赖项的轻量级、可执行的软件包，是容器的运行模板。</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Kubernetes</td>
+                                        <td>一个开源的容器编排平台，用于自动化容器的部署、扩展和操作。</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Docker</td>
+                                        <td>一个开源的容器化平台，使开发人员能够将应用程序与其依赖项打包到容器中。</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pod</td>
+                                        <td>Kubernetes中的最小部署单元，可以包含一个或多个容器，这些容器共享存储和网络资源。</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 返回顶部按钮 -->
+            <div class="back-to-top" id="back-to-top">
+                <i class="fas fa-arrow-up"></i>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 配置面板 -->
+    <div class="config-panel" id="config-panel">
+        <div class="config-header">
+            <div class="config-title">系统配置</div>
+            <button class="config-close" id="config-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="config-body">
+            <div class="config-section">
+                <div class="config-section-title">
+                    <i class="fas fa-cog"></i> 基本设置
+                </div>
+                <div class="config-form-row">
+                    <label>配置版本名称：</label>
+                    <input type="text" id="config-name" placeholder="例如：标准配置v1.0">
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <div class="config-section-title">
+                    <i class="fas fa-balance-scale"></i> 模块权重配置
+                </div>
+                <div class="config-form-row">
+                    <label>服务端文档权重：</label>
+                    <input type="number" id="section1-weight" min="1" max="80" value="50">
+                </div>
+                <div class="config-form-row">
+                    <label>容器化文档权重：</label>
+                    <input type="number" id="section2-weight" min="1" max="80" value="30">
+                </div>
+                <div class="config-form-row">
+                    <label>客户端文档权重：</label>
+                    <input type="number" id="section3-weight" min="1" max="80" value="20">
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <div class="config-section-title">
+                    <i class="fas fa-chart-line"></i> 风险等级阈值
+                </div>
+                <div class="config-form-row">
+                    <label>A级阈值：</label>
+                    <input type="number" id="threshold-a" min="75" max="100" value="90">
+                </div>
+                <div class="config-form-row">
+                    <label>B级阈值：</label>
+                    <input type="number" id="threshold-b" min="60" max="89" value="75">
+                </div>
+                <div class="config-form-row">
+                    <label>C级阈值：</label>
+                    <input type="number" id="threshold-c" min="1" max="74" value="60">
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <div class="config-section-title">
+                    <i class="fas fa-exclamation-triangle"></i> 缺失项判断阈值
+                </div>
+                <div class="config-form-row">
+                    <label>缺失判断阈值：</label>
+                    <input type="number" id="missing-threshold" min="0.1" max="0.9" step="0.05" value="0.6">
+                </div>
+            </div>
+        </div>
+        
+        <div class="config-actions">
+            <button id="reset-config" class="btn btn-secondary">重置默认</button>
+            <button id="save-config" class="btn btn-primary">保存配置</button>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title">操作成功</div>
+            <div class="toast-message">数据已保存</div>
+        </div>
+    </div>
+    
+    <script src="js/common.js"></script>
+    <script src="js/config-system.js"></script>
+    <script>
+        // 帮助页面特定功能
+        function initHelpPage() {
+            // 设置当前日期
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // 导航折叠功能
+            document.querySelectorAll('.help-nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 获取目标区域
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement) {
+                        // 滚动到目标位置
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                        
+                        // 更新活动状态
+                        document.querySelectorAll('.help-nav-link').forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        // 处理子菜单
+                        const subMenu = this.nextElementSibling;
+                        if (subMenu && subMenu.classList.contains('help-nav-sub')) {
+                            document.querySelectorAll('.help-nav-sub').forEach(sub => {
+                                if (sub !== subMenu) sub.classList.remove('open');
+                            });
+                            subMenu.classList.toggle('open');
+                        }
+                    }
+                });
+            });
+            
+            // 子菜单项点击
+            document.querySelectorAll('.help-nav-sub-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 获取目标区域
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement) {
+                        // 滚动到目标位置
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                        
+                        // 更新活动状态
+                        document.querySelectorAll('.help-nav-sub-link').forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+                    }
+                });
+            });
+            
+            // 折叠面板功能
+            document.querySelectorAll('.help-collapse-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    const collapse = this.parentElement;
+                    collapse.classList.toggle('open');
+                });
+            });
+            
+            // 返回顶部按钮
+            const backToTopBtn = document.getElementById('back-to-top');
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            });
+            
+            backToTopBtn.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            // 搜索功能
+            const searchInput = document.getElementById('help-search-input');
+            searchInput.addEventListener('input', function() {
+                const searchText = this.value.toLowerCase();
+                
+                if (searchText.length < 2) return; // 至少输入2个字符
+                
+                // 搜索所有内容
+                document.querySelectorAll('.help-section, .help-sub-section, .help-collapse').forEach(element => {
+                    const content = element.textContent.toLowerCase();
+                    
+                    if (content.includes(searchText)) {
+                        // 找到匹配项，高亮显示
+                        if (element.classList.contains('help-collapse') && !element.classList.contains('open')) {
+                            element.classList.add('open');
+                        }
+                        
+                        // 如果是折叠面板内容，确保其父折叠面板打开
+                        if (element.classList.contains('help-collapse-content')) {
+                            element.parentElement.classList.add('open');
+                        }
+                        
+                        // 如果搜索的是具体的段落，滚动到该位置
+                        if (searchText.length > 3 && content.indexOf(searchText) > -1) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            return; // 找到最匹配的后停止
+                        }
+                    }
+                });
+            });
+            
+            // 打印功能
+            document.getElementById('print-button').addEventListener('click', function() {
+                window.print();
+            });
+        }
+        
+        // 导出为页面特定功能
+        window.initHelpPage = initHelpPage;
+    </script>
+</body>
+</html>
