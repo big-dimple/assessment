@@ -1,14 +1,14 @@
 # 游戏上线评估系统
 评估打分页
-![评估打分](images/score.jpg)
+![评估打分](https://i.imgur.com/LwLDR4n.jpeg)
 
 历史列表页
-![历史列表](images/list.jpg)
+![历史列表](https://i.imgur.com/V4pKqjn.jpeg)
 
 评估报告页
-![评估报告](images/report.jpg)
+![评估报告](https://i.imgur.com/w7F1ZOu.jpeg)
 
---- 
+ 
 > 专为游戏团队设计的工具，用于评估游戏项目所需的技术准备工作完成度。本系统帮助研发与运维团队在项目容器化过程中统一
 标准，识别风险点，提前规避潜在问题。
 > 评估新游戏部署前的文档完备性-侧面印证技术准备情况。
