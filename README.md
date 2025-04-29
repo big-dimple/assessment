@@ -100,7 +100,7 @@ sudo systemctl status nginx
 **CentOS系统:**
 ```bash
 # 安装PHP和必要扩展
-sudo yum install php php-fpm php-json
+sudo yum install php php-fpm php-json php-cli
 
 # 启动PHP-FPM并设置开机自启
 sudo systemctl start php-fpm
@@ -113,7 +113,7 @@ sudo systemctl status php-fpm
 **Ubuntu系统:**
 ```bash
 # 安装PHP和必要扩展
-sudo apt install php-fpm php-json
+sudo apt install php-fpm php-json php-cli
 
 # 启动PHP-FPM并设置开机自启
 sudo systemctl start php-fpm
