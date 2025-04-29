@@ -713,6 +713,7 @@
     <script src="js/common.js"></script>
     <script src="js/config-system.js"></script>
     <script src="js/dynamic-result-page.js"></script>
+    <script src="js/result-import.js"></script>
 
     <script>
         // 获取会话存储中的评估数据
@@ -1307,45 +1308,37 @@
         function printReport() {
             window.print();
         }
-        
+
         // 导出报告
         function exportReport() {
-            if (!assessmentData) return;
-            
-            // 准备导出数据
-            const exportData = {
-                exported_date: new Date().toISOString(),
-                report_type: 'container_deployment_assessment',
-                project: {
-                    name: assessmentData.gameName,
-                    version_type: assessmentData.gameVersion,
-                    version_number: assessmentData.versionNumber,
-                    assessment_date: assessmentData.date
-                },
-                scores: {
-                    total: assessmentData.totalScore,
-                    grade: getGradeFromScore(assessmentData.totalScore),
-                    sections: {
-                        server_docs: assessmentData.sectionScores[1],
-                        container_docs: assessmentData.sectionScores[2],
-                        client_docs: assessmentData.sectionScores[3]
-                    },
-                    items: assessmentData.scores
-                }
-            };
-            
-            // 创建下载链接
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
-            const fileName = `${exportData.project.name || 'project'}_deployment_assessment_${formatDate(new Date())}.json`;
-            
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", fileName);
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-            
-            showToast('导出成功', '评估报告已导出');
+                const assessmentData = JSON.parse(sessionStorage.getItem('currentAssessment'));
+                if (!assessmentData) return;
+                
+                // 确保数据格式与assessments中的项目一致
+                const exportData = {
+                        id: assessmentData.id || Date.now(),
+                        date: assessmentData.date,
+                        gameName: assessmentData.gameName,
+                        gameVersion: assessmentData.gameVersion,
+                        versionNumber: assessmentData.versionNumber,
+                        scores: assessmentData.scores,
+                        totalScore: assessmentData.totalScore,
+                        sectionScores: assessmentData.sectionScores,
+                        config: assessmentData.config
+                };
+                
+                // 创建下载链接
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+                const fileName = `${exportData.gameName || 'assessment'}_${formatDate(new Date())}.json`;
+                
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", fileName);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                
+                showToast('导出成功', '评估报告已导出，可直接导入到历史记录中');
         }
         
         // 格式化日期：YYYYMMDD

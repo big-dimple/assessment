@@ -746,6 +746,7 @@
     <script src="static/js/chart.min.js"></script>
     <script src="js/common.js"></script>
     <script src="js/config-system.js"></script>
+    <script src="js/server-backup.js"></script>
     <script>
         // Global variables
         let assessments = [];
@@ -1508,61 +1509,134 @@
         
         // Import records
         function importRecords() {
-            const fileInput = document.getElementById('import-file');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                showToast('导入失败', '请选择要导入的文件', 'error');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    
-                    // Handle array or single object
-                    const newRecords = Array.isArray(importedData) ? importedData : [importedData];
-                    
-                    // Ensure unique IDs
-                    const existingIds = new Set(assessments.map(a => a.id));
-                    newRecords.forEach(record => {
-                        if (!record.id || existingIds.has(record.id)) {
-                            record.id = Date.now() + Math.floor(Math.random() * 10000);
-                        }
-                        existingIds.add(record.id);
-                    });
-                    
-                    // Merge records
-                    assessments = [...assessments, ...newRecords];
-                    
-                    // Save to local storage
-                    localStorage.setItem('containerAssessments', JSON.stringify(assessments));
-                    
-                    // Reload data
-                    loadAssessments();
-                    renderTable();
-                    updateStatistics();
-                    
-                    // Update trend chart
-                    if (trendChart) {
-                        trendChart.destroy();
-                        initTrendChart();
-                    }
-                    
-                    // Close modal
-                    document.getElementById('import-modal').classList.remove('active');
-                    
-                    // Show toast
-                    showToast('导入成功', `成功导入 ${newRecords.length} 条评估记录`);
-                } catch (error) {
-                    console.error('Import error:', error);
-                    showToast('导入失败', '文件格式无效，请选择正确的JSON文件', 'error');
+                const fileInput = document.getElementById('import-file');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                        showToast('导入失败', '请选择要导入的文件', 'error');
+                        return;
                 }
-            };
-            reader.readAsText(file);
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                        try {
+                                const importedData = JSON.parse(e.target.result);
+                                
+                                // 处理多种可能的导入格式
+                                let newRecords = [];
+                                
+                                // 1. 直接是一个评估记录数组
+                                if (Array.isArray(importedData)) {
+                                        newRecords = importedData;
+                                } 
+                                // 2. 单个评估记录对象
+                                else if (importedData.id && (importedData.scores || importedData.totalScore)) {
+                                        newRecords = [importedData];
+                                } 
+                                // 3. Result页面导出的旧格式
+                                else if (importedData.report_type === 'container_deployment_assessment' && importedData.project && importedData.scores) {
+                                        // 将旧格式转换为兼容格式
+                                        const record = {
+                                                id: Date.now(),
+                                                date: importedData.project.assessment_date || importedData.exported_date || new Date().toISOString(),
+                                                gameName: importedData.project.name || 'Unknown Game',
+                                                gameVersion: importedData.project.version_type || '',
+                                                versionNumber: importedData.project.version_number || '',
+                                                totalScore: importedData.scores.total || 0,
+                                                sectionScores: importedData.scores.sections || {},
+                                                scores: importedData.scores.items || {}
+                                        };
+                                        
+                                        if (importedData.configuration) {
+                                                record.config = importedData.configuration;
+                                        }
+                                        
+                                        newRecords = [record];
+                                } 
+                                // 4. 其他未知格式
+                                else {
+                                        throw new Error("无法识别的数据格式");
+                                }
+                                
+                                // 验证记录格式是否有效
+                                const validRecords = newRecords.filter(record => {
+                                        // 至少需要id、gameName和totalScore
+                                        return record && record.id && 
+                                               (record.gameName || record.gameName === '') && 
+                                               (typeof record.totalScore !== 'undefined');
+                                });
+                                
+                                if (validRecords.length === 0) {
+                                        showToast('导入失败', '导入文件中没有有效的评估记录', 'error');
+                                        return;
+                                }
+                                
+                                // 确保每条记录有基本必要的字段
+                                validRecords.forEach(record => {
+                                        // 确保有日期
+                                        if (!record.date) {
+                                                record.date = new Date().toISOString();
+                                        }
+                                        
+                                        // 确保有分数对象
+                                        if (!record.scores) {
+                                                record.scores = {};
+                                        }
+                                        
+                                        // 确保有部分分数对象
+                                        if (!record.sectionScores) {
+                                                record.sectionScores = {
+                                                        1: { max: 50, current: 0 },
+                                                        2: { max: 30, current: 0 },
+                                                        3: { max: 20, current: 0 }
+                                                };
+                                        }
+                                });
+                                
+                                // 确保ID唯一性
+                                const existingIds = new Set(assessments.map(a => a.id));
+                                validRecords.forEach(record => {
+                                        if (!record.id || existingIds.has(record.id)) {
+                                                record.id = Date.now() + Math.floor(Math.random() * 10000);
+                                        }
+                                        existingIds.add(record.id);
+                                });
+                                
+                                // 合并到现有评估中
+                                assessments = [...assessments, ...validRecords];
+                                
+                                // 保存到本地存储
+                                localStorage.setItem('containerAssessments', JSON.stringify(assessments));
+                                
+                                // 重新加载数据
+                                loadAssessments();
+                                renderTable();
+                                updateStatistics();
+                                
+                                // 关闭模态框
+                                document.getElementById('import-modal').classList.remove('active');
+                                
+                                // 显示成功消息
+                                showToast('导入成功', `成功导入 ${validRecords.length} 条评估记录`);
+                                
+                                // 更新趋势图表
+                                if (trendChart) {
+                                        trendChart.destroy();
+                                        initTrendChart();
+                                }
+                                
+                                // 如果有数据分析图表，也更新它们
+                                if (typeof updateAnalyticsCharts === 'function') {
+                                        updateAnalyticsCharts();
+                                }
+                        } catch (error) {
+                                console.error('Import error:', error);
+                                showToast('导入失败', '文件格式无效或损坏，请选择正确的JSON文件', 'error');
+                        }
+                };
+                reader.readAsText(file);
         }
-        
+       
         // Export all records
         function exportAllRecords() {
             if (assessments.length === 0) {
