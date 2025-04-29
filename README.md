@@ -1,17 +1,18 @@
 # 游戏上线评估系统
-评估打分页
-![评估打分](https://github.com/big-dimple/assessment/releases/download/v1.0.1-alpha/score.jpg)
-
-历史列表页
-![历史列表](https://github.com/big-dimple/assessment/releases/download/v1.0.1-alpha/list.jpg)
-
-评估报告页
-![评估报告](https://github.com/big-dimple/assessment/releases/download/v1.0.1-alpha/report.jpg)
-
- 
 > 专为游戏团队设计的工具，用于评估游戏项目所需的技术准备工作完成度。本系统帮助研发与运维团队在项目容器化过程中统一
 标准，识别风险点，提前规避潜在问题。
 > 评估新游戏部署前的文档完备性-侧面印证技术准备情况。
+
+**评估打分页**
+![评估打分](https://github.com/big-dimple/assessment/releases/download/v1.0.1-alpha/score.jpg)
+
+**历史列表页**
+![历史列表](https://github.com/big-dimple/assessment/releases/download/v1.0.1-alpha/list.jpg)
+
+**评估报告页**
+![评估报告](https://github.com/big-dimple/assessment/releases/download/v1.0.1-alpha/report.jpg)
+
+ 
 - 注意：本系统的评估结果仅作为部署决策的参考依据之一，最终决策应结合实际情况，由项目管理层和技术负责人共同制
 定。
 
